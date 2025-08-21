@@ -57,7 +57,9 @@
     thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
     tbody tr{background:var(--table-row);border:1px solid var(--border)}
     tfoot td{border-top:1px solid var(--border);color:var(--text-soft);font-weight:700}
-    .right{text-align:right}
+    .right{text-align:right; font-size:0.92rem}
+    @media (max-width:600px){ .right{font-size:0.85rem} }
+    .eur-input{font-size:0.95rem}
     .note{font-size:12px;color:var(--muted)}
 
     /* Inputs compactos */
@@ -307,11 +309,10 @@ const SAMPLE = {
     {cat:'TRN_BTA', det:'Uber Suba ↔ Apto El Dorado (ida/vuelta, estim.)', eur:22},
     {cat:'TRN_MDE', det:'Uber JMC → MDE (ida, estim.)', eur:7},
     {cat:'TRN_MDE', det:'Uber MDE → JMC (vuelta, estim.)', eur:7},
-    {cat:'TRN_AXM', det:'Traslados locales AXM/Quindío (miscel.)', eur:18},
-    {cat:'RENT', det:'Alquiler Kia Picanto (5 días)', eur:180},
+        {cat:'RENT', det:'Alquiler Kia Picanto (5 días)', eur:180},
     {cat:'RENT', det:'Seguro adicional (estim.)', eur:50},
     {cat:'RENT', det:'Gasolina + peajes (5 días)', eur:40},
-    {cat:'STY_MDE', det:'Apto MDE (4 noches)', eur:226},
+    {cat:'STY_MDE', det:'Apto MDE (jue–lun, total 1’060.000 COP)', eur:226.6},
     {cat:'STY_AXM', det:'Casa Circasia (5 noches)', eur:160},
     {cat:'TOUR_MDE', det:'Free tour Comuna 13 (propina 10 €/pax x3)', eur:30},
     {cat:'TOUR_MDE', det:'Tour Guatapé (30 €/pax x3)', eur:90},
@@ -377,17 +378,37 @@ function confirmStay(){ const d=document.getElementById('stDesde').value||''; co
 
 // ---------- Presupuesto Detallado ----------
 function delRow(idx){ state.detalle.splice(idx,1); saveState(); render(); }
-function onEditRow(idx, field, value){ if(field==='eur') state.detalle[idx].eur = num(value); else if(field==='cat') state.detalle[idx].cat = value; else state.detalle[idx][field] = value; saveState(); renderTotals(); renderCharts(); }
+function onEditRow(idx, field, value){
+  if(field==='eur') state.detalle[idx].eur = num(value);
+  else if(field==='cat') state.detalle[idx].cat = value;
+  else state.detalle[idx][field] = value;
+  saveState();
+  render();
+}
 
 // ---------- Itinerario ----------
 function delItRow(i){ state.itinerario.splice(i,1); saveState(); render(); }
-function onEditIt(i, j, value){ if(j===4) state.itinerario[i][j] = num(value); else state.itinerario[i][j] = value; saveState(); renderItTotals(); buildCalendars(); }
+function onEditIt(i, j, value){
+  if(j===4) state.itinerario[i][j] = num(value);
+  else state.itinerario[i][j] = value;
+  saveState();
+  render();
+}
 
 // ---------- Filtros ----------
 function applyFilter(){ renderTables(); renderCharts(); buildCalendars(); }
 
 // ---------- Render maestro ----------
-function render(){ document.getElementById('fx').value = state.fx.toFixed(2); fillCatFilter(); renderTables(); renderTotals(); renderItTotals(); renderCharts(); buildCalendars(); }
+function render(){
+  document.getElementById('fx').value = state.fx.toFixed(2);
+  fillCatFilter();
+  if(typeof reorderPresupuesto==='function') reorderPresupuesto();
+  renderTables();
+  renderTotals();
+  renderItTotals();
+  renderCharts();
+  buildCalendars();
+}
 
 function fillCatFilter(){ const sel = document.getElementById('filterCat'); const keep = sel.value; const cats = [...new Set(state.detalle.map(r=>r.cat||'OTROS'))].sort(); sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>{ const def = CATEGORY_DEFS[c]||{icon:'🧾',label:c}; return `<option value="${c}">${def.icon} ${def.label}</option>`; }).join(''); sel.value = keep || ''; }
 
@@ -458,6 +479,16 @@ async function saveToGitHub(){ const repo = document.getElementById('ghRepo').va
 
 // ---------- Init ----------
 render();
+// Orden lógico del presupuesto
+function reorderPresupuesto(){
+  const order = ['ROAD_ES','VUE','TRN_BTA','TRN_MDE','RENT','STY_MDE','STY_AXM','TOUR_MDE','TOUR_EJE','EXTRA'];
+  const idx = Object.fromEntries(order.map((k,i)=>[k,i]));
+  state.detalle.sort((a,b)=>{
+    const ia = idx[a.cat] ?? 999, ib = idx[b.cat] ?? 999;
+    if(ia!==ib) return ia-ib;
+    return (a.det||'').localeCompare(b.det||'');
+  });
+}
 </script>
 </body>
 </html>
