@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Plan de Viaje Colombia — Presupuesto & Itinerario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Plan de Viaje — Presupuesto & Itinerario</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,37 +13,39 @@
       --primary:#059669;--accent:#2563eb;--ring:#e2e8f0;--border:#e5e7eb;--chip:#eef2ff;
       --table-row:#f8fafc;--shadow:rgba(2,6,23,.08);
       /* Anchuras controladas */
-      --detail-ch: 65ch; /* pedido: 65 caracteres máximo */
-      --cop-ch: 14ch;   /* pedido: 14 caracteres máximo */
-      --eur-col: 72px;  /* compacta en móvil */
-      --cat-col: 150px; /* selector categoría */
-      --action-col: 44px; /* icono eliminar */
-      --container-max: 980px; /* evitar que se vea gigante en PC */
+      --detail-max: clamp(34ch, 55vw, 65ch); /* máx 65c, adapta a viewport */
+      --cop-ch: 14ch;   /* COP fijo */
+      --eur-col: 68px;  /* € compacto */
+      --cat-col: 110px; /* categoría aún más compacta */
+      --action-col: 40px; /* icono eliminar */
+      --container-max: 940px; /* evita que se vea gigante en PC */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    /* Contenedor fluido y centrado, sin huecos laterales raros */
-    .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:clamp(8px,4vw,16px)}
-    .grid{display:grid;gap:16px}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:16px}
+    @media (max-width:600px){body{font-size:17px}}
+    /* Contenedor fluido y centrado sin huecos */
+    .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:clamp(10px,4vw,16px)}
+    .grid{display:grid;gap:12px}
     .cards{grid-template-columns:1fr}
     @media(min-width:1024px){.cards{grid-template-columns:1fr 1fr}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 12px 16px;box-shadow:0 10px 30px var(--shadow)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 10px 14px;box-shadow:0 8px 24px var(--shadow)}
     h1{font-size:clamp(18px,2.2vw,22px);margin:8px 0 10px}
     h2{font-size:clamp(15px,1.8vw,18px);margin:0 0 8px;color:var(--text-soft)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     label{font-size:12px;color:var(--muted)}
-    input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 10px;outline:none}
+    input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 10px;outline:none}
     input[type="number"]:focus,input[type="text"]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
-    button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer}
+    button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 12px;cursor:pointer}
     button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;color:white;font-weight:700}
     button.warn{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
 
-    /* Tablas 100% responsive sin scroll horizontal en iPhone Safari */
-    .table-wrap{width:100%;overflow-x:auto}
-    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed;min-width:0}
+    /* Tablas 100% responsive; SIN scroll del body en iPhone */
+    .table-wrap{width:100%;overflow-x:auto;overscroll-behavior:contain}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
     colgroup col.col-cat{width:var(--cat-col)}
-    colgroup col.col-det{width:var(--detail-ch)}
+    colgroup col.col-det{width:var(--detail-max)}
     colgroup col.col-eur{width:var(--eur-col)}
     colgroup col.col-cop{width:var(--cop-ch)}
     colgroup col.col-act{width:var(--action-col)}
@@ -55,39 +57,44 @@
     .note{font-size:12px;color:var(--muted)}
 
     /* Inputs compactos */
-    .eur-input{width:100%;max-width:64px;text-align:right}
+    .eur-input{width:100%;max-width:60px;text-align:right}
     .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
 
     /* Gráficas */
     canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:12px;padding:6px}
     .section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px}
 
-    /* Calendario */
+    /* Calendario: Lista y Agenda */
     .calendar{overflow:auto}
     .calendar-tabs{display:flex;gap:8px;margin-bottom:8px}
     .tab{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer}
     .tab.active{background:#eef2ff;border-color:#c7d2fe}
 
-    /* Vista Lista */
-    .calendar-list{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:12px}
-    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:360px}
-    .day-header{font-weight:700;color:var(--text-soft);margin-bottom:8px;display:flex;justify-content:space-between}
-    .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:8px}
+    .calendar-list{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:10px}
+    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:340px}
+    .day-header{font-weight:700;color:var(--text-soft);margin-bottom:6px;display:flex;justify-content:space-between}
+    .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:6px}
     .slot .time{font-size:12px;color:#64748b}
     .slot .title{font-size:14px}
     .wx{font-size:12px;color:#334155;margin-top:2px}
 
-    /* Vista Agenda (tipo Teams) */
-    .agenda-wrap{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:12px}
+    .agenda-wrap{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:10px}
     .agenda-day{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px}
     .agenda-header{display:flex;justify-content:space-between;color:var(--text-soft);font-weight:700;margin-bottom:6px}
-    .hours{position:relative;height:960px; /* 16 horas * 60px/h */ border-left:1px solid #e5e7eb}
+    .hours{position:relative;height:900px;border-left:1px solid #e5e7eb}
     .hour-line{position:absolute;left:0;right:0;height:0;border-top:1px dashed #e5e7eb}
-    .hour-label{position:absolute;left:-42px;top:-8px;font-size:11px;color:#64748b}
+    .hour-label{position:absolute;left:-40px;top:-8px;font-size:11px;color:#64748b}
     .block{position:absolute;left:8px;right:8px;border-radius:8px;padding:6px 8px;background:#e0f2fe;border:1px solid #bae6fd;overflow:hidden}
     .block .btime{font-size:12px;color:#1f2937}
     .block .btitle{font-size:13px}
     .stay{background:#ecfccb;border-color:#d9f99d}
+
+    /* Modales: forzar ocultos por defecto (evita que aparezcan al fondo en GH Pages) */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal .box{background:white;color:#0b1020;border:1px solid #e5e7eb;border-radius:16px;max-width:520px;width:100%;padding:16px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+    .modal .row{gap:8px}
+    .modal .box h3{margin:0 0 8px 0}
+    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -104,6 +111,7 @@
             <label for="fx" class="note">Tipo de cambio EUR→COP</label>
             <input id="fx" type="number" step="0.01" value="4678.18" style="width:120px" />
             <button class="primary" onclick="saveFX()">Actualizar</button>
+            <button onclick="openSyncModal()">Guardar en GitHub</button>
           </div>
         </div>
         <canvas id="barChart"></canvas>
@@ -204,14 +212,14 @@
           <div id="calendarList" class="calendar-list"></div>
           <div id="calendarAgenda" class="agenda-wrap" style="display:none"></div>
         </div>
-        <p class="note">Cada día muestra min/max estimada y lluvia basada en promedios climáticos. Para pronóstico en tiempo real podemos añadir una integración con Open‑Meteo.</p>
+        <p class="note">Clima: promedio mensual (si falla la API, se usa tabla local). Para pronóstico real podemos activarlo cerca de la fecha.</p>
       </section>
 
     </div>
   </div>
 
   <!-- Modal añadir presupuesto -->
-  <div id="modalAdd" class="modal" aria-hidden="true">
+  <div id="modalAdd" class="modal" aria-hidden="true" style="display:none">
     <div class="box">
       <h3>Agregar ítem al presupuesto</h3>
       <div class="row"><label>Categoria</label><select id="mCat"></select></div>
@@ -222,7 +230,7 @@
   </div>
 
   <!-- Modal añadir itinerario -->
-  <div id="modalAddIt" class="modal" aria-hidden="true">
+  <div id="modalAddIt" class="modal" aria-hidden="true" style="display:none">
     <div class="box">
       <h3>Agregar día al itinerario</h3>
       <div class="row"><label>Fecha</label><input id="miFecha" type="text" placeholder="dd/mm/aaaa" /></div>
@@ -235,7 +243,7 @@
   </div>
 
   <!-- Modal añadir estadía -->
-  <div id="modalStay" class="modal" aria-hidden="true">
+  <div id="modalStay" class="modal" aria-hidden="true" style="display:none">
     <div class="box">
       <h3>Agregar estadía (rango de fechas)</h3>
       <div class="row"><label>Desde</label><input id="stDesde" type="text" placeholder="dd/mm/aaaa" /></div>
@@ -246,11 +254,25 @@
     </div>
   </div>
 
+  <!-- Modal sync GitHub -->
+  <div id="modalSync" class="modal" aria-hidden="true" style="display:none">
+    <div class="box">
+      <h3>Guardar cambios en GitHub</h3>
+      <p class="note">Se guardará el JSON de tu plan en tu repositorio. Tus credenciales se guardan <b>solo</b> en este navegador (localStorage).</p>
+      <div class="row"><label>Repo (usuario/repo)</label><input id="ghRepo" type="text" placeholder="usuario/plan-colombia"/></div>
+      <div class="row"><label>Branch</label><input id="ghBranch" type="text" value="main"/></div>
+      <div class="row"><label>Ruta del archivo</label><input id="ghPath" type="text" value="data/plan.json"/></div>
+      <div class="row"><label>GitHub PAT (scopes: repo)</label><input id="ghToken" type="password" placeholder="ghp_..."/></div>
+      <div class="actions"><button onclick="closeSyncModal()">Cancelar</button><button class="primary" onclick="saveToGitHub()">Guardar</button></div>
+      <div id="syncMsg" class="note"></div>
+    </div>
+  </div>
+
 <script>
 // ---------- Abreviaturas ----------
 const CITY_ABBR = [
   [/bogotá/gi,'BOG'], [/medellín/gi,'MDE'], [/armenia/gi,'AXM'], [/madrid/gi,'MAD'],
-  [/aeropuerto/gi,'Apto'], [/jose maria cordoba|josé maría córdoba|jmc/gi,'JMC'],
+  [/aeropuerto/gi,'Apto'], [/jose maria c[oó]rdoba|jos[eé] mar[ií]a c[oó]rdoba|jmc/gi,'JMC'],
   [/el dorado/gi,'El Dorado']
 ];
 function abbrText(s){
@@ -274,7 +296,7 @@ const CATEGORY_DEFS = {
   ROAD_ES:{label:'Roadtrip España', icon:'🚙', abbr:'ROAD-ES'}
 };
 
-// ---------- Estado inicial (con tus datos) ----------
+// ---------- Estado inicial ----------
 const SAMPLE = {
   fx: 4678.18,
   detalle: [
@@ -295,40 +317,36 @@ const SAMPLE = {
     {cat:'TOUR_EJE', det:'Entrada Parque del Café (26 €/pax x3)', eur:78},
     {cat:'TOUR_EJE', det:'Entrada Valle del Cocora (4 €/pax x3)', eur:12},
     {cat:'TOUR_EJE', det:'Entrada Termales Santa Rosa (10 €/pax x3)', eur:30},
-    {cat:'EXTRA', det:'Bogotá → Villa de Leyva (bus 9 €/pax x3)', eur:27},
-    {cat:'ROAD_ES', det:'Parking Madrid-Barajas (26 Sep – 17 Oct)', eur:126},
-    {cat:'ROAD_ES', det:'Gasolina Logroño → Madrid (RAV4, estimado)', eur:35},
+    {cat:'EXTRA', det:'BOG → Villa de Leyva (bus 9 €/pax x3)', eur:27},
+    {cat:'ROAD_ES', det:'Parking MAD (26 Sep – 17 Oct)', eur:126},
+    {cat:'ROAD_ES', det:'Gasolina LGR → MAD (RAV4, est.)', eur:35},
   ],
   itinerario: [
-    ['26/09/2025','05:00','Logroño → Madrid','Conducir RAV4 al parking T1/T2/T3',0],
-    ['26/09/2025','08:30','Madrid (Barajas)','Llegada al parking · check-in',0],
-    ['26/09/2025','—','Madrid (Barajas)','Vuelo a Bogotá (pre-embarque)',0],
-    ['28/09/2025','09:00','Bogotá → Villa de Leyva','Bus a Villa de Leyva (3 pax)',27],
-    ['02/10/2025','14:30','Bogotá → Medellín','Vuelo Jetsmart + Uber + Noche MDE',177],
-    ['03/10/2025','09:30','Medellín','Free Tour Comuna 13 + Noche MDE',86],
-    ['04/10/2025','07:00','Medellín','Tour Guatapé + Noche MDE',146],
-    ['05/10/2025','10:00','Medellín','Pueblito Paisa + Metro/Metrocable + Noche',56],
-    ['06/10/2025','16:57','Medellín → Armenia','Vuelo Avianca + Uber + Noche Circasia + Seguro',243],
-    ['07/10/2025','08:00','Circasia/Quindío','Valle del Cocora + Salento + coche',106],
-    ['08/10/2025','09:00','Circasia/Quindío','Parque del Café + coche + Noche',154],
-    ['09/10/2025','09:00','Circasia/Quindío','Filandia + Termales + coche + Noche',106],
-    ['10/10/2025','10:00','Circasia/Quindío','Día libre + coche + Noche',76],
-    ['11/10/2025','18:50','Armenia → Bogotá','Coche + Gasolina + Vuelo Wingo + Uber',184],
-    ['16/10/2025','—','Bogotá → Madrid','Traslado a El Dorado (Uber XL, 3 pax + 1 gato)',25],
-    ['17/10/2025','10:00','Madrid (Barajas)','Recoger RAV4 y retorno a Logroño',0],
+    ['26/09/2025','05:00','LGR → MAD','Conducir RAV4 al parking T1/T2/T3',0],
+    ['26/09/2025','08:30','MAD (Barajas)','Llegada al parking · check-in',0],
+    ['26/09/2025','—','MAD (Barajas)','Vuelo a BOG (pre-embarque)',0],
+    ['28/09/2025','09:00','BOG → Villa de Leyva','Bus a Villa de Leyva (3 pax)',27],
+    ['02/10/2025','14:30','BOG → MDE','Vuelo Jetsmart + Uber + Noche MDE',177],
+    ['03/10/2025','09:30','MDE','Free Tour Comuna 13 + Noche MDE',86],
+    ['04/10/2025','07:00','MDE','Tour Guatapé + Noche MDE',146],
+    ['05/10/2025','10:00','MDE','Pueblito Paisa + Metro/Metrocable + Noche',56],
+    ['06/10/2025','16:57','MDE → AXM','Vuelo Avianca + Uber + Noche Circasia + Seguro',243],
+    ['07/10/2025','08:00','AXM/Circasia','Valle del Cocora + Salento + coche',106],
+    ['08/10/2025','09:00','AXM/Circasia','Parque del Café + coche + Noche',154],
+    ['09/10/2025','09:00','AXM/Circasia','Filandia + Termales + coche + Noche',106],
+    ['10/10/2025','10:00','AXM/Circasia','Día libre + coche + Noche',76],
+    ['11/10/2025','18:50','AXM → BOG','Coche + Gasolina + Vuelo Wingo + Uber',184],
+    ['16/10/2025','—','BOG → MAD','Traslado a El Dorado (Uber XL, 3 pax + 1 gato)',25],
+    ['17/10/2025','10:00','MAD (Barajas)','Recoger RAV4 y retorno a LGR',0],
   ],
   stays: [
-    {desde:'02/10/2025', hasta:'06/10/2025', lugar:'Medellín · Apto', nota:'4 noches'},
+    {desde:'02/10/2025', hasta:'06/10/2025', lugar:'MDE · Apto', nota:'4 noches'},
     {desde:'06/10/2025', hasta:'11/10/2025', lugar:'Circasia · Casa', nota:'5 noches'}
   ]
 };
 
 let state = loadState();
-
-function loadState(){
-  const raw = localStorage.getItem('colombia-plan');
-  return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SAMPLE));
-}
+function loadState(){ const raw = localStorage.getItem('colombia-plan'); return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SAMPLE)); }
 function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
 
 // ---------- Utils ----------
@@ -341,356 +359,108 @@ function addDays(dt, n){ const d=new Date(dt); d.setDate(d.getDate()+n); return 
 function weekdayShortEs(date){ const s=new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(date); return s.replace('.', '').slice(0,3).toUpperCase(); }
 
 // ---------- FX ----------
-function saveFX(){
-  const v = parseFloat(document.getElementById('fx').value||'0');
-  state.fx = isFinite(v) && v>0 ? v : state.fx; 
-  document.getElementById('fx').value = state.fx.toFixed(2);
-  saveState();
-  renderTotals();
-  renderItTotals();
-}
+function saveFX(){ const v = parseFloat(document.getElementById('fx').value||'0'); state.fx = isFinite(v) && v>0 ? v : state.fx; document.getElementById('fx').value = state.fx.toFixed(2); saveState(); renderTotals(); renderItTotals(); }
 
 // ---------- Modales ----------
-function openAddModal(){
-  const m=document.getElementById('modalAdd');
-  const sel=document.getElementById('mCat');
-  sel.innerHTML = Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join('');
-  m.style.display='flex';
-}
+function openAddModal(){ const m=document.getElementById('modalAdd'); const sel=document.getElementById('mCat'); sel.innerHTML = Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join(''); m.style.display='flex'; }
 function closeAddModal(){ document.getElementById('modalAdd').style.display='none'; }
-function confirmAdd(){
-  const k=document.getElementById('mCat').value;
-  const d=document.getElementById('mDet').value||'Nuevo ítem';
-  const e=num(document.getElementById('mEur').value);
-  state.detalle.push({cat:k, det:d, eur:e});
-  saveState(); closeAddModal(); render();
-}
+function confirmAdd(){ const k=document.getElementById('mCat').value; const d=document.getElementById('mDet').value||'Nuevo ítem'; const e=num(document.getElementById('mEur').value); state.detalle.push({cat:k, det:d, eur:e}); saveState(); closeAddModal(); render(); }
 
 function openAddItModal(){ document.getElementById('modalAddIt').style.display='flex'; }
 function closeAddItModal(){ document.getElementById('modalAddIt').style.display='none'; }
-function confirmAddIt(){
-  const f=document.getElementById('miFecha').value||'';
-  const h=document.getElementById('miHora').value||'';
-  const l=document.getElementById('miLugar').value||'';
-  const a=document.getElementById('miAct').value||'';
-  const e=num(document.getElementById('miEur').value);
-  state.itinerario.push([f,h,l,a,e]);
-  saveState(); closeAddItModal(); render();
-}
+function confirmAddIt(){ const f=document.getElementById('miFecha').value||''; const h=document.getElementById('miHora').value||''; const l=document.getElementById('miLugar').value||''; const a=document.getElementById('miAct').value||''; const e=num(document.getElementById('miEur').value); state.itinerario.push([f,h,l,a,e]); saveState(); closeAddItModal(); render(); }
 
 function openStayModal(){ document.getElementById('modalStay').style.display='flex'; }
 function closeStayModal(){ document.getElementById('modalStay').style.display='none'; }
-function confirmStay(){
-  const d=document.getElementById('stDesde').value||'';
-  const h=document.getElementById('stHasta').value||'';
-  const l=document.getElementById('stLugar').value||'';
-  const n=document.getElementById('stNota').value||'';
-  if(d && h && l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendars(); }
-  closeStayModal();
-}
+function confirmStay(){ const d=document.getElementById('stDesde').value||''; const h=document.getElementById('stHasta').value||''; const l=document.getElementById('stLugar').value||''; const n=document.getElementById('stNota').value||''; if(d && h && l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendars(); } closeStayModal(); }
 
 // ---------- Presupuesto Detallado ----------
 function delRow(idx){ state.detalle.splice(idx,1); saveState(); render(); }
-function onEditRow(idx, field, value){
-  if(field==='eur') state.detalle[idx].eur = num(value);
-  else if(field==='cat') state.detalle[idx].cat = value;
-  else state.detalle[idx][field] = value;
-  saveState(); renderTotals(); renderCharts();
-}
+function onEditRow(idx, field, value){ if(field==='eur') state.detalle[idx].eur = num(value); else if(field==='cat') state.detalle[idx].cat = value; else state.detalle[idx][field] = value; saveState(); renderTotals(); renderCharts(); }
 
 // ---------- Itinerario ----------
 function delItRow(i){ state.itinerario.splice(i,1); saveState(); render(); }
-function onEditIt(i, j, value){
-  if(j===4) state.itinerario[i][j] = num(value); else state.itinerario[i][j] = value;
-  saveState(); renderItTotals(); buildCalendars();
-}
+function onEditIt(i, j, value){ if(j===4) state.itinerario[i][j] = num(value); else state.itinerario[i][j] = value; saveState(); renderItTotals(); buildCalendars(); }
 
 // ---------- Filtros ----------
 function applyFilter(){ renderTables(); renderCharts(); buildCalendars(); }
 
 // ---------- Render maestro ----------
-function render(){
-  document.getElementById('fx').value = state.fx.toFixed(2);
-  fillCatFilter();
-  renderTables();
-  renderTotals();
-  renderItTotals();
-  renderCharts();
-  buildCalendars();
-}
+function render(){ document.getElementById('fx').value = state.fx.toFixed(2); fillCatFilter(); renderTables(); renderTotals(); renderItTotals(); renderCharts(); buildCalendars(); }
 
-function fillCatFilter(){
-  const sel = document.getElementById('filterCat');
-  const keep = sel.value;
-  const cats = [...new Set(state.detalle.map(r=>r.cat||'OTROS'))].sort();
-  sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>{
-    const def = CATEGORY_DEFS[c]||{icon:'🧾',label:c};
-    return `<option value="${c}">${def.icon} ${def.label}</option>`;
-  }).join('');
-  sel.value = keep || '';
-}
+function fillCatFilter(){ const sel = document.getElementById('filterCat'); const keep = sel.value; const cats = [...new Set(state.detalle.map(r=>r.cat||'OTROS'))].sort(); sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>{ const def = CATEGORY_DEFS[c]||{icon:'🧾',label:c}; return `<option value="${c}">${def.icon} ${def.label}</option>`; }).join(''); sel.value = keep || ''; }
 
 function renderTables(){
   const txt = (document.getElementById('filterText').value||'').toLowerCase();
   const cat = document.getElementById('filterCat').value||'';
-
   // Detalle
-  const tb = document.getElementById('tbody-detalle');
-  tb.innerHTML = '';
-  state.detalle
-    .filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt)))
-    .forEach((r,idx)=>{
-      const tr = document.createElement('tr');
-      const def = CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
-      tr.innerHTML = `
-        <td title="${def.label}">
-          <select onchange="onEditRow(${idx},'cat',this.value)">
-            ${Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}" ${k===r.cat?'selected':''}>${v.icon} ${v.abbr}</option>`).join('')}
-          </select>
-        </td>
-        <td title="${r.det}"><input type="text" value="${r.det}" oninput="onEditRow(${idx},'det',this.value)"/></td>
-        <td class="right"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
-        <td class="right">${fmtCOP(r.eur*state.fx)}</td>
-        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
-      // aplicar abreviatura visual al detalle sin tocar el valor real
-      const detInput = tr.querySelector('td:nth-child(2) input');
-      detInput.addEventListener('blur', ()=>{ detInput.value = detInput.value; });
-      detInput.value = abbrText(detInput.value);
-      tb.appendChild(tr);
-    });
-
+  const tb = document.getElementById('tbody-detalle'); tb.innerHTML = '';
+  state.detalle.filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt))).forEach((r,idx)=>{
+    const tr = document.createElement('tr'); const def = CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
+    tr.innerHTML = `
+      <td title="${def.label}">
+        <select onchange="onEditRow(${idx},'cat',this.value)">
+          ${Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}" ${k===r.cat?'selected':''}>${v.icon} ${v.abbr}</option>`).join('')}
+        </select>
+      </td>
+      <td title="${r.det}"><input type="text" value="${abbrText(r.det)}" oninput="onEditRow(${idx},'det',this.value)"/></td>
+      <td class="right"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
+      <td class="right">${fmtCOP(r.eur*state.fx)}</td>
+      <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
+    tb.appendChild(tr);
+  });
   // Itinerario
   const ft = (document.getElementById('filterIt').value||'').toLowerCase();
-  const tbi = document.getElementById('tbody-it');
-  tbi.innerHTML='';
-  state.itinerario
-    .filter(it => (!ft || (it[1]+" "+it[2]+" "+it[3]).toLowerCase().includes(ft)))
-    .forEach((it, i)=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td title="${it[0]}"><input type="text" value="${it[0]}" oninput="onEditIt(${i},0,this.value)"/></td>
-        <td title="${it[1]}"><input type="text" value="${it[1]}" oninput="onEditIt(${i},1,this.value)"/></td>
-        <td title="${it[2]}"><input type="text" value="${abbrText(it[2])}" oninput="onEditIt(${i},2,this.value)"/></td>
-        <td title="${it[3]}"><input type="text" value="${abbrText(it[3])}" oninput="onEditIt(${i},3,this.value)"/></td>
-        <td class="right"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
-        <td class="right">${fmtCOP(it[4]*state.fx)}</td>
-        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
-      tbi.appendChild(tr);
-    });
+  const tbi = document.getElementById('tbody-it'); tbi.innerHTML='';
+  state.itinerario.filter(it => (!ft || (it[1]+" "+it[2]+" "+it[3]).toLowerCase().includes(ft))).forEach((it, i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td title="${it[0]}"><input type="text" value="${it[0]}" oninput="onEditIt(${i},0,this.value)"/></td>
+      <td title="${it[1]}"><input type="text" value="${it[1]}" oninput="onEditIt(${i},1,this.value)"/></td>
+      <td title="${it[2]}"><input type="text" value="${abbrText(it[2])}" oninput="onEditIt(${i},2,this.value)"/></td>
+      <td title="${it[3]}"><input type="text" value="${abbrText(it[3])}" oninput="onEditIt(${i},3,this.value)"/></td>
+      <td class="right"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
+      <td class="right">${fmtCOP(it[4]*state.fx)}</td>
+      <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
+    tbi.appendChild(tr);
+  });
 }
 
-function renderTotals(){
-  const totalE = state.detalle.reduce((a,b)=>a+(+b.eur||0),0);
-  const totalC = totalE * state.fx;
-  document.getElementById('total-eur').textContent = fmtEUR(totalE);
-  document.getElementById('total-cop').textContent = fmtCOP(totalC);
-}
-function renderItTotals(){
-  const tE = state.itinerario.reduce((a,b)=>a+(+b[4]||0),0);
-  const tC = tE * state.fx;
-  document.getElementById('tot-it-eur').textContent = fmtEUR(tE);
-  document.getElementById('tot-it-cop').textContent = fmtCOP(tC);
-}
+function renderTotals(){ const totalE = state.detalle.reduce((a,b)=>a+(+b.eur||0),0); const totalC = totalE * state.fx; document.getElementById('total-eur').textContent = fmtEUR(totalE); document.getElementById('total-cop').textContent = fmtCOP(totalC); }
+function renderItTotals(){ const tE = state.itinerario.reduce((a,b)=>a+(+b[4]||0),0); const tC = tE * state.fx; document.getElementById('tot-it-eur').textContent = fmtEUR(tE); document.getElementById('tot-it-cop').textContent = fmtCOP(tC); }
 
 // ---------- Charts ----------
 let barChart, pieChart;
-function groupByCategory(){
-  const map = new Map();
-  const txt = (document.getElementById('filterText').value||'').toLowerCase();
-  const cat = document.getElementById('filterCat').value||'';
-  state.detalle
-    .filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt)))
-    .forEach(r=>{ map.set(r.cat, (map.get(r.cat)||0) + (+r.eur||0)); });
-  const labels = [...map.keys()].map(k=>{
-    const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k};
-    return `${d.icon} ${d.abbr}`;
-  });
-  const values = [...map.values()];
-  return {labels, values};
-}
-function renderCharts(){
-  const {labels, values} = groupByCategory();
-  const ctx1 = document.getElementById('barChart');
-  const ctx2 = document.getElementById('pieChart');
-  const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981'];
+function groupByCategory(){ const map = new Map(); const txt = (document.getElementById('filterText').value||'').toLowerCase(); const cat = document.getElementById('filterCat').value||''; state.detalle.filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt))).forEach(r=>{ map.set(r.cat, (map.get(r.cat)||0) + (+r.eur||0)); }); const labels = [...map.keys()].map(k=>{ const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k}; return `${d.icon} ${d.abbr}`; }); const values = [...map.values()]; return {labels, values}; }
+function renderCharts(){ const {labels, values} = groupByCategory(); const ctx1 = document.getElementById('barChart'); const ctx2 = document.getElementById('pieChart'); const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981']; if(barChart) barChart.destroy(); barChart = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{display:false}}} }); if(pieChart) pieChart.destroy(); pieChart = new Chart(ctx2, { type:'pie', data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{position:'bottom'}}} }); }
 
-  if(barChart) barChart.destroy();
-  barChart = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{display:false}}} });
-
-  if(pieChart) pieChart.destroy();
-  pieChart = new Chart(ctx2, { type:'pie', data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{position:'bottom'}}} });
-}
-
-// ---------- Clima (promedio mensual) ----------
-const CITY_COORD = {
-  'BOG': {lat:4.701, lon:-74.146},
-  'MDE': {lat:6.219, lon:-75.590},
-  'AXM': {lat:4.453, lon:-75.766},
-  'MAD': {lat:40.471, lon:-3.562},
+// ---------- Clima: API + fallback local ----------
+const CITY_COORD = { 'BOG': {lat:4.701, lon:-74.146}, 'MDE': {lat:6.219, lon:-75.590}, 'AXM': {lat:4.453, lon:-75.766}, 'MAD': {lat:40.471, lon:-3.562} };
+const CLIMATE_FALLBACK = { // medias aprox °C y precip (mm/día) por mes
+  BOG:{'09':{tmin:9,tmax:20,pp:3},'10':{tmin:9,tmax:19,pp:5}},
+  MDE:{'09':{tmin:17,tmax:28,pp:6},'10':{tmin:17,tmax:27,pp:7}},
+  AXM:{'09':{tmin:16,tmax:26,pp:7},'10':{tmin:16,tmax:25,pp:8}},
+  MAD:{'09':{tmin:15,tmax:28,pp:1},'10':{tmin:11,tmax:21,pp:2}},
 };
-let climateCache = {}; // {key: {month:"09": {tmin,tmax,pp}}}
+let climateCache = {};
+async function loadClimate(code){ if(climateCache[code]) return climateCache[code]; const {lat,lon} = CITY_COORD[code]||{}; if(!lat) return {}; const url = `https://climate-api.open-meteo.com/v1/climate?latitude=${lat}&longitude=${lon}&start_month=01&end_month=12&daily=temperature_2m_max_mean,temperature_2m_min_mean,precipitation_sum_mean`; try{ const res = await fetch(url,{mode:'cors'}); const j = await res.json(); const out = {}; (j?.daily?.time||[]).forEach((d,i)=>{ const m=d.split('-')[1]; out[m]={ tmin:j.daily.temperature_2m_min_mean?.[i]??null, tmax:j.daily.temperature_2m_max_mean?.[i]??null, pp:j.daily.precipitation_sum_mean?.[i]??null }; }); climateCache[code]=out; return out; }catch(e){ return CLIMATE_FALLBACK[code]||{}; } }
+function pickCityCode(text){ const t=(text||'').toUpperCase(); if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE'; if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM'; if(t.includes('BOG')||t.includes('SUBA')) return 'BOG'; if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('MADRID')||t.includes('LGR')||t.includes('LOGRO')) return 'MAD'; return 'MDE'; }
+async function getWxFor(dateStr, placeText){ const code = pickCityCode(abbrText(placeText||'')); const month = (dateStr||'01/01/2000').split('/')[1]; const climate = await loadClimate(code); const m = climate?.[month] || (CLIMATE_FALLBACK[code]?.[month]) || {}; const rainy = (m.pp||0) > 2; return { code, tmin: m.tmin, tmax: m.tmax, rainy }; }
 
-async function loadClimate(code){
-  if(climateCache[code]) return climateCache[code];
-  const {lat,lon} = CITY_COORD[code]||{}; if(!lat) return {};
-  // Open‑Meteo Climate API (promedios mensuales)
-  const url = `https://climate-api.open-meteo.com/v1/climate?latitude=${lat}&longitude=${lon}&start_month=01&end_month=12&daily=temperature_2m_max_mean,temperature_2m_min_mean,precipitation_sum_mean`;
-  try{
-    const res = await fetch(url); const j = await res.json();
-    const out = {};
-    (j?.daily?.time||[]).forEach((d, i)=>{
-      const m = d.split('-')[1];
-      out[m] = {
-        tmin: j.daily.temperature_2m_min_mean?.[i] ?? null,
-        tmax: j.daily.temperature_2m_max_mean?.[i] ?? null,
-        pp: j.daily.precipitation_sum_mean?.[i] ?? null
-      };
-    });
-    climateCache[code]=out; return out;
-  }catch(e){ return {}; }
-}
+// ---------- Calendarios ----------
+function switchCal(which){ document.getElementById('tabList').classList.toggle('active', which==='list'); document.getElementById('tabAgenda').classList.toggle('active', which==='agenda'); document.getElementById('calendarList').style.display = which==='list'? 'grid':'none'; document.getElementById('calendarAgenda').style.display = which==='agenda'? 'grid':'none'; }
+async function buildCalendars(){ buildListCalendar(); await buildAgendaCalendar(); }
+async function buildListCalendar(){ const host = document.getElementById('calendarList'); host.innerHTML=''; const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'', lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'00:00', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='day-col'; col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`; const wx = await getWxFor(k, byDate[k][0]?.lugar||''); const wxp = document.createElement('div'); const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||'')); for(const it of items){ const el = document.createElement('div'); el.className='slot'; el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el); } host.appendChild(col); } }
+async function buildAgendaCalendar(){ const host = document.getElementById('calendarAgenda'); host.innerHTML=''; const HSTART=6, HEND=22, PIX_PER_H=54; function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H; } const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'08:00', dur:60, lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'07:00', dur:90, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='agenda-day'; col.innerHTML = `<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`; const wx = await getWxFor(k, byDate[k][0]?.lugar||''); const wxp = document.createElement('div'); wxp.className='wx'; const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const hours = document.createElement('div'); hours.className='hours'; for(let h=HSTART; h<=HEND; h++){ const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line); const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label); } const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||'')); for(const it of items){ const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H; const block = document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top = top+'px'; block.style.height = hpx+'px'; block.innerHTML = `<div class=\"btime\">${it.hora} · ${abbrText(it.lugar)}</div><div class=\"btitle\">${abbrText(it.act)}</div>`; hours.appendChild(block); } col.appendChild(hours); host.appendChild(col); } }
 
-function pickCityCode(text){
-  const t=(text||'').toUpperCase();
-  if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE';
-  if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM';
-  if(t.includes('BOG')||t.includes('SUBA')) return 'BOG';
-  if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('MADRID')) return 'MAD';
-  return 'MDE';
-}
-
-async function getWxFor(dateStr, placeText){
-  const code = pickCityCode(abbrText(placeText||''));
-  const month = (dateStr||'01/01/2000').split('/')[1];
-  const climate = await loadClimate(code);
-  const m = climate[month]||{};
-  const rainy = (m.pp||0) > 2; // umbral simple
-  return { code, tmin: m.tmin, tmax: m.tmax, rainy };
-}
-
-// ---------- Calendarios (Lista y Agenda) ----------
-function switchCal(which){
-  document.getElementById('tabList').classList.toggle('active', which==='list');
-  document.getElementById('tabAgenda').classList.toggle('active', which==='agenda');
-  document.getElementById('calendarList').style.display = which==='list'? 'grid':'none';
-  document.getElementById('calendarAgenda').style.display = which==='agenda'? 'grid':'none';
-}
-
-async function buildCalendars(){
-  buildListCalendar();
-  await buildAgendaCalendar();
-}
-
-async function buildListCalendar(){
-  const host = document.getElementById('calendarList');
-  host.innerHTML='';
-  const byDate = {};
-  for(const it of state.itinerario){
-    const [fecha,hora,lugar,act] = it;
-    const key = fecha||'Sin fecha';
-    if(!byDate[key]) byDate[key]=[];
-    byDate[key].push({hora:hora||'', lugar, act});
-  }
-  (state.stays||[]).forEach(st=>{
-    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
-    if(!isNaN(from) && !isNaN(to)){
-      for(let d=from; d<=to; d=addDays(d,1)){
-        const key = formatDMY(d);
-        if(!byDate[key]) byDate[key]=[];
-        byDate[key].push({hora:'00:00', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'});
-      }
-    }
-  });
-  const keys = Object.keys(byDate).sort((a,b)=>{
-    const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-');
-    return pa.localeCompare(pb);
-  });
-  for(const k of keys){
-    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
-    const col = document.createElement('div');
-    col.className='day-col';
-    col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`;
-    // clima
-    const wx = await getWxFor(k, byDate[k][0]?.lugar||'');
-    const wxp = document.createElement('div');
-    const rain = wx.rainy? '🌧️':'☀️';
-    const tmin = wx.tmin!=null? Math.round(wx.tmin): '—';
-    const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
-    wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`;
-    col.appendChild(wxp);
-
-    const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||''));
-    for(const it of items){
-      const el = document.createElement('div');
-      el.className='slot';
-      el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`;
-      col.appendChild(el);
-    }
-    host.appendChild(col);
-  }
-}
-
-async function buildAgendaCalendar(){
-  const host = document.getElementById('calendarAgenda');
-  host.innerHTML='';
-  const HSTART=6, HEND=22, PIX_PER_H=60; // escala
-  function yFrom(hm){
-    if(!hm||hm==='—') return 0;
-    const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H;
-  }
-
-  const byDate = {};
-  for(const it of state.itinerario){
-    const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha';
-    if(!byDate[key]) byDate[key]=[];
-    byDate[key].push({hora:hora||'08:00', dur:60, lugar, act});
-  }
-  (state.stays||[]).forEach(st=>{
-    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
-    if(!isNaN(from) && !isNaN(to)){
-      for(let d=from; d<=to; d=addDays(d,1)){
-        const key = formatDMY(d);
-        if(!byDate[key]) byDate[key]=[];
-        byDate[key].push({hora:'07:00', dur:90, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true});
-      }
-    }
-  });
-  const keys = Object.keys(byDate).sort((a,b)=>{
-    const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-');
-    return pa.localeCompare(pb);
-  });
-  for(const k of keys){
-    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
-    const col = document.createElement('div'); col.className='agenda-day';
-    col.innerHTML = `<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`;
-    // clima
-    const wx = await getWxFor(k, byDate[k][0]?.lugar||'');
-    const wxp = document.createElement('div'); wxp.className='wx';
-    const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
-    wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`;
-    col.appendChild(wxp);
-
-    const hours = document.createElement('div'); hours.className='hours';
-    for(let h=HSTART; h<=HEND; h++){
-      const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line);
-      const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label);
-    }
-    // bloques
-    const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
-    for(const it of items){
-      const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H;
-      const block = document.createElement('div'); block.className='block'+(it.stay?' stay':'');
-      block.style.top = top+'px'; block.style.height = hpx+'px';
-      block.innerHTML = `<div class="btime">${it.hora} · ${abbrText(it.lugar)}</div><div class="btitle">${abbrText(it.act)}</div>`;
-      hours.appendChild(block);
-    }
-    col.appendChild(hours);
-    host.appendChild(col);
-  }
-}
-
-// ---------- Tabs calendario ----------
-function switchCalInit(){ switchCal('list'); }
+// ---------- Sync con GitHub (cliente) ----------
+function openSyncModal(){ document.getElementById('modalSync').style.display='flex'; const repo = localStorage.getItem('ghRepo')||''; const branch = localStorage.getItem('ghBranch')||'main'; const path = localStorage.getItem('ghPath')||'data/plan.json'; document.getElementById('ghRepo').value=repo; document.getElementById('ghBranch').value=branch; document.getElementById('ghPath').value=path; }
+function closeSyncModal(){ document.getElementById('modalSync').style.display='none'; }
+async function saveToGitHub(){ const repo = document.getElementById('ghRepo').value.trim(); const branch = document.getElementById('ghBranch').value.trim(); const path = document.getElementById('ghPath').value.trim(); const token = document.getElementById('ghToken').value.trim(); const msg = document.getElementById('syncMsg'); if(!repo||!branch||!path||!token){ msg.textContent='Completa todos los campos.'; return; } localStorage.setItem('ghRepo',repo); localStorage.setItem('ghBranch',branch); localStorage.setItem('ghPath',path); try{ const content = btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2)))); const headers = { 'Authorization': `token ${token}`, 'Accept':'application/vnd.github+json' }; // obtener SHA si existe
+    const getUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`;
+    let sha=null; const getRes = await fetch(getUrl,{headers}); if(getRes.ok){ const j=await getRes.json(); sha=j.sha; }
+    const putUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}`;
+    const body = { message:'update plan.json', content, branch, sha }; const putRes = await fetch(putUrl,{ method:'PUT', headers, body: JSON.stringify(body)}); if(!putRes.ok){ const t=await putRes.text(); throw new Error(t); } msg.textContent='¡Guardado en GitHub!'; } catch(e){ msg.textContent='Error guardando en GitHub: '+e.message; } }
 
 // ---------- Init ----------
 render();
