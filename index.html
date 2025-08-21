@@ -12,17 +12,23 @@
       --bg:#f6f7fb;--card:#ffffff;--muted:#5b6476;--text:#0b1020;--text-soft:#334155;
       --primary:#059669;--accent:#2563eb;--ring:#e2e8f0;--border:#e5e7eb;--chip:#eef2ff;
       --table-row:#f8fafc;--shadow:rgba(2,6,23,.08);
+      /* Anchuras dinámicas */
+      --detail-ch: 48ch; /* se recalcula por JS según el contenido */
+      --cop-ch: 14ch; /* fijo como pediste */
+      --eur-col: 80px; /* columna € estrecha */
+      --cat-col: 160px; /* selector categoría */
+      --action-col: 44px; /* icono eliminar */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .container{max-width:1100px;margin:24px auto;padding:0 16px}
+    .container{width:100%;max-width:min(1200px, 96vw);margin:24px auto;padding:0 clamp(8px,2vw,16px)}
     .grid{display:grid;gap:16px}
     .cards{grid-template-columns:1fr}
-    @media(min-width:1000px){.cards{grid-template-columns:1fr 1fr}}
+    @media(min-width:1100px){.cards{grid-template-columns:1fr 1fr}}
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px var(--shadow)}
-    h1{font-size:20px;margin:0 0 10px 0}
-    h2{font-size:16px;margin:0 0 10px 0;color:var(--text-soft)}
+    h1{font-size:clamp(18px,2.2vw,22px);margin:0 0 10px 0}
+    h2{font-size:clamp(15px,1.8vw,18px);margin:0 0 10px 0;color:var(--text-soft)}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     label{font-size:12px;color:var(--muted)}
     input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;outline:none}
@@ -30,7 +36,8 @@
     button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;cursor:pointer}
     button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;color:white;font-weight:700}
     button.warn{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
-    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .table-wrap{width:100%;overflow:auto}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px;min-width:720px}
     th,td{text-align:left;padding:10px 12px}
     thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
     tbody tr{background:var(--table-row);border:1px solid var(--border)}
@@ -40,16 +47,13 @@
     canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:16px;padding:8px}
     .section-title{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
 
-    /* Compactación y legibilidad */
-    td input[type="text"]{min-width:120px;max-width:100%;width:100%}
-    .wrap{white-space:normal;word-break:break-word}
-    .ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-    /* Columna € estrecha */
-    .eur-col{width:90px;}
+    /* Columnas compactas */
+    .col-cat{width:var(--cat-col)}
+    .col-det{max-width:var(--detail-ch)}
+    .col-eur{width:var(--eur-col)}
+    .col-cop{width:var(--cop-ch)}
+    .col-act{width:var(--action-col)}
     .eur-input{width:100%;max-width:80px;text-align:right}
-
-    /* Botón eliminar como icono */
     .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
 
     /* Modal */
@@ -59,11 +63,11 @@
     .modal .box h3{margin:0 0 8px 0}
     .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 
-    /* Calendario estilo columnas */
+    /* Calendario */
     .calendar{overflow:auto}
-    .calendar-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px}
+    .calendar-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:12px}
     .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:420px}
-    .day-header{font-weight:700;color:var(--text-soft);margin-bottom:8px}
+    .day-header{font-weight:700;color:var(--text-soft);margin-bottom:8px;display:flex;justify-content:space-between}
     .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:8px}
     .slot .time{font-size:12px;color:#64748b}
     .slot .title{font-size:14px}
@@ -74,7 +78,6 @@
   <div class="container">
     <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
       <h1>Plan de Viaje — Colombia · Presupuesto & Itinerario</h1>
-      <!-- elementos informativos removidos por petición -->
     </div>
 
     <div class="grid cards">
@@ -99,35 +102,35 @@
         <div class="section-title">
           <h2>Presupuesto detallado</h2>
           <div class="row">
-            <select id="filterCat" onchange="applyFilter()">
-              <option value="">Todas</option>
-            </select>
+            <select id="filterCat" onchange="applyFilter()"><option value="">Todas</option></select>
             <input id="filterText" type="text" placeholder="Filtrar por texto…" oninput="applyFilter()" />
             <button class="primary" onclick="openAddModal()">+ Añadir</button>
             <button class="warn" onclick="resetData()">Restablecer</button>
           </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:160px">Categoría</th>
-              <th>Detalle</th>
-              <th class="right eur-col">€</th>
-              <th class="right">COP</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tbody-detalle" class="wrap ellipsis"></tbody>
-          <tfoot>
-            <tr>
-              <td></td>
-              <td class="right">TOTAL</td>
-              <td class="right" id="total-eur">0</td>
-              <td class="right" id="total-cop">0</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-cat">Categoría</th>
+                <th class="col-det">Detalle</th>
+                <th class="right col-eur">€</th>
+                <th class="right col-cop">COP</th>
+                <th class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-detalle"></tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td class="right">TOTAL</td>
+                <td class="right" id="total-eur">0</td>
+                <td class="right" id="total-cop">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </section>
 
       <!-- Card: Itinerario -->
@@ -139,40 +142,47 @@
             <button class="primary" onclick="openAddItModal()">+ Añadir día</button>
           </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:120px">Fecha</th>
-              <th style="width:80px">Hora</th>
-              <th style="width:200px">Lugar</th>
-              <th>Actividad</th>
-              <th class="right eur-col">Costo €</th>
-              <th class="right">Costo COP</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tbody-it" class="wrap ellipsis"></tbody>
-          <tfoot>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td class="right">TOTAL</td>
-              <td class="right" id="tot-it-eur">0</td>
-              <td class="right" id="tot-it-cop">0</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px">Fecha</th>
+                <th style="width:80px">Hora</th>
+                <th style="width:200px">Lugar</th>
+                <th class="col-det">Actividad</th>
+                <th class="right col-eur">Costo €</th>
+                <th class="right col-cop">Costo COP</th>
+                <th class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-it"></tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="right">TOTAL</td>
+                <td class="right" id="tot-it-eur">0</td>
+                <td class="right" id="tot-it-cop">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </section>
 
       <!-- Card: Calendario (vista semanal simple) -->
       <section class="card">
-        <div class="section-title"><h2>Calendario (vista por día y hora)</h2></div>
+        <div class="section-title">
+          <h2>Calendario (vista por día y hora)</h2>
+          <div class="row">
+            <button onclick="openStayModal()">+ Añadir estadía</button>
+          </div>
+        </div>
         <div class="calendar">
           <div id="calendarGrid" class="calendar-grid"></div>
         </div>
-        <p class="note">Los eventos se ordenan por hora dentro de cada día.</p>
+        <p class="note">Los eventos se ordenan por hora dentro de cada día. Puedes añadir estadías (rango de fechas) y se rellenan automáticamente día por día.</p>
       </section>
 
     </div>
@@ -182,22 +192,10 @@
   <div id="modalAdd" class="modal" aria-hidden="true">
     <div class="box">
       <h3>Agregar ítem al presupuesto</h3>
-      <div class="row">
-        <label>Categoria</label>
-        <select id="mCat"></select>
-      </div>
-      <div class="row">
-        <label>Detalle</label>
-        <input id="mDet" type="text" placeholder="Descripción" />
-      </div>
-      <div class="row">
-        <label>Euros (€)</label>
-        <input id="mEur" type="number" step="0.01" value="0" />
-      </div>
-      <div class="actions">
-        <button onclick="closeAddModal()">Cancelar</button>
-        <button class="primary" onclick="confirmAdd()">Añadir</button>
-      </div>
+      <div class="row"><label>Categoria</label><select id="mCat"></select></div>
+      <div class="row"><label>Detalle</label><input id="mDet" type="text" placeholder="Descripción" /></div>
+      <div class="row"><label>Euros (€)</label><input id="mEur" type="number" step="0.01" value="0" /></div>
+      <div class="actions"><button onclick="closeAddModal()">Cancelar</button><button class="primary" onclick="confirmAdd()">Añadir</button></div>
     </div>
   </div>
 
@@ -210,15 +208,24 @@
       <div class="row"><label>Lugar</label><input id="miLugar" type="text" placeholder="Ciudad / trayecto" /></div>
       <div class="row"><label>Actividad</label><input id="miAct" type="text" placeholder="Descripción" /></div>
       <div class="row"><label>Costo €</label><input id="miEur" type="number" step="0.01" value="0" /></div>
-      <div class="actions">
-        <button onclick="closeAddItModal()">Cancelar</button>
-        <button class="primary" onclick="confirmAddIt()">Añadir</button>
-      </div>
+      <div class="actions"><button onclick="closeAddItModal()">Cancelar</button><button class="primary" onclick="confirmAddIt()">Añadir</button></div>
+    </div>
+  </div>
+
+  <!-- Modal añadir estadía -->
+  <div id="modalStay" class="modal" aria-hidden="true">
+    <div class="box">
+      <h3>Agregar estadía (rango de fechas)</h3>
+      <div class="row"><label>Desde</label><input id="stDesde" type="text" placeholder="dd/mm/aaaa" /></div>
+      <div class="row"><label>Hasta</label><input id="stHasta" type="text" placeholder="dd/mm/aaaa" /></div>
+      <div class="row"><label>Lugar</label><input id="stLugar" type="text" placeholder="Ciudad / alojamiento" /></div>
+      <div class="row"><label>Nota</label><input id="stNota" type="text" placeholder="p.ej. " /></div>
+      <div class="actions"><button onclick="closeStayModal()">Cancelar</button><button class="primary" onclick="confirmStay()">Añadir</button></div>
     </div>
   </div>
 
 <script>
-// ---------- Diccionario de categorías con iconos/abreviaturas ----------
+// ---------- Categorías con iconos/abreviaturas ----------
 const CATEGORY_DEFS = {
   VUE:{label:'Vuelos', icon:'✈️', abbr:'VUE'},
   TRN_BTA:{label:'Transporte Bogotá', icon:'🚕', abbr:'TRN-BTA'},
@@ -233,7 +240,7 @@ const CATEGORY_DEFS = {
   ROAD_ES:{label:'Roadtrip España', icon:'🚙', abbr:'ROAD-ES'}
 };
 
-// ---------- Estado inicial (incluye nuevos datos del punto 11/12) ----------
+// ---------- Estado inicial (incluye tus datos) ----------
 const SAMPLE = {
   fx: 4678.18,
   detalle: [
@@ -255,11 +262,9 @@ const SAMPLE = {
     {cat:'TOUR_EJE', det:'Entrada Valle del Cocora (4 €/pax x3)', eur:12},
     {cat:'TOUR_EJE', det:'Entrada Termales Santa Rosa (10 €/pax x3)', eur:30},
     {cat:'EXTRA', det:'Bogotá → Villa de Leyva (bus 9 €/pax x3)', eur:27},
-    // Nuevos del punto 11/12
     {cat:'ROAD_ES', det:'Parking Madrid-Barajas (26 Sep – 17 Oct)', eur:126},
     {cat:'ROAD_ES', det:'Gasolina Logroño → Madrid (RAV4, estimado)', eur:35},
   ],
-  // Itinerario ahora con hora (HH:MM)
   itinerario: [
     ['26/09/2025','05:00','Logroño → Madrid','Conducir RAV4 al parking T1/T2/T3',0],
     ['26/09/2025','08:30','Madrid (Barajas)','Llegada al parking · check-in',0],
@@ -277,6 +282,11 @@ const SAMPLE = {
     ['11/10/2025','18:50','Armenia → Bogotá','Coche + Gasolina + Vuelo Wingo + Uber',184],
     ['16/10/2025','—','Bogotá → Madrid','Traslado a El Dorado (Uber XL, 3 pax + 1 gato)',25],
     ['17/10/2025','10:00','Madrid (Barajas)','Recoger RAV4 y retorno a Logroño',0],
+  ],
+  stays: [
+    // Puedes añadir más con el modal
+    {desde:'02/10/2025', hasta:'06/10/2025', lugar:'Medellín · Apartamento', nota:'4 noches'},
+    {desde:'06/10/2025', hasta:'11/10/2025', lugar:'Circasia · Casa', nota:'5 noches'}
   ]
 };
 
@@ -288,11 +298,17 @@ function loadState(){
 }
 function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
 
-// ---------- Helpers ----------
-function clabel(key){ const c=CATEGORY_DEFS[key]||{icon:'🧾',abbr:key}; return `${c.icon} ${c.abbr}`; }
+// ---------- Utilidades ----------
 function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
 function fmtEUR(n){return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0)}
 function fmtCOP(n){return new Intl.NumberFormat('es-CO').format(Math.round(n||0)) + ' COP'}
+function parseDMY(s){ const [d,m,y]=(s||'').split('/').map(x=>+x); return new Date(y,m-1,d); }
+function formatDMY(dt){ const d=String(dt.getDate()).padStart(2,'0'); const m=String(dt.getMonth()+1).padStart(2,'0'); const y=dt.getFullYear(); return `${d}/${m}/${y}`; }
+function addDays(dt, n){ const d=new Date(dt); d.setDate(d.getDate()+n); return d; }
+function weekdayShortEs(date){
+  const s = new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(date); // ej. "jue."
+  return s.replace('.', '').slice(0,3).toUpperCase(); // JUE
+}
 
 // ---------- FX ----------
 function saveFX(){
@@ -332,13 +348,24 @@ function confirmAddIt(){
   saveState(); closeAddItModal(); render();
 }
 
+function openStayModal(){ document.getElementById('modalStay').style.display='flex'; }
+function closeStayModal(){ document.getElementById('modalStay').style.display='none'; }
+function confirmStay(){
+  const d=document.getElementById('stDesde').value||'';
+  const h=document.getElementById('stHasta').value||'';
+  const l=document.getElementById('stLugar').value||'';
+  const n=document.getElementById('stNota').value||'';
+  if(d && h && l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendar(); }
+  closeStayModal();
+}
+
 // ---------- Presupuesto Detallado ----------
 function delRow(idx){ state.detalle.splice(idx,1); saveState(); render(); }
 function onEditRow(idx, field, value){
   if(field==='eur') state.detalle[idx].eur = num(value);
   else if(field==='cat') state.detalle[idx].cat = value;
   else state.detalle[idx][field] = value;
-  saveState(); renderTotals(); renderCharts();
+  saveState(); renderTotals(); renderCharts(); autosizeDetailColumn();
 }
 
 // ---------- Itinerario ----------
@@ -360,6 +387,7 @@ function render(){
   renderItTotals();
   renderCharts();
   buildCalendar();
+  autosizeDetailColumn();
 }
 
 function fillCatFilter(){
@@ -386,15 +414,15 @@ function renderTables(){
       const tr = document.createElement('tr');
       const def = CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
       tr.innerHTML = `
-        <td title="${def.label}">
+        <td class="col-cat" title="${def.label}">
           <select onchange="onEditRow(${idx},'cat',this.value)">
             ${Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}" ${k===r.cat?'selected':''}>${v.icon} ${v.abbr}</option>`).join('')}
           </select>
         </td>
-        <td title="${r.det}"><input type="text" value="${r.det}" oninput="onEditRow(${idx},'det',this.value)"/></td>
-        <td class="right eur-col"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
-        <td class="right">${fmtCOP(r.eur*state.fx)}</td>
-        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
+        <td class="col-det" title="${r.det}"><input type="text" value="${r.det}" oninput="onEditRow(${idx},'det',this.value)"/></td>
+        <td class="right col-eur"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
+        <td class="right col-cop">${fmtCOP(r.eur*state.fx)}</td>
+        <td class="right col-act"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
       tb.appendChild(tr);
     });
 
@@ -409,11 +437,11 @@ function renderTables(){
       tr.innerHTML = `
         <td title="${it[0]}"><input type="text" value="${it[0]}" oninput="onEditIt(${i},0,this.value)"/></td>
         <td title="${it[1]}"><input type="text" value="${it[1]}" oninput="onEditIt(${i},1,this.value)"/></td>
-        <td title="${it[2]}"><input type="text" value="${it[2]}" oninput="onEditIt(${i},2,this.value)"/></td>
-        <td title="${it[3]}"><input type="text" value="${it[3]}" oninput="onEditIt(${i},3,this.value)"/></td>
-        <td class="right eur-col"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
-        <td class="right">${fmtCOP(it[4]*state.fx)}</td>
-        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
+        <td class="col-cat" title="${it[2]}"><input type="text" value="${it[2]}" oninput="onEditIt(${i},2,this.value)"/></td>
+        <td class="col-det" title="${it[3]}"><input type="text" value="${it[3]}" oninput="onEditIt(${i},3,this.value)"/></td>
+        <td class="right col-eur"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
+        <td class="right col-cop">${fmtCOP(it[4]*state.fx)}</td>
+        <td class="right col-act"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
       tbi.appendChild(tr);
     });
 }
@@ -440,7 +468,10 @@ function groupByCategory(){
   state.detalle
     .filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt)))
     .forEach(r=>{ map.set(r.cat, (map.get(r.cat)||0) + (+r.eur||0)); });
-  const labels = [...map.keys()].map(k=>clabel(k));
+  const labels = [...map.keys()].map(k=>{
+    const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k};
+    return `${d.icon} ${d.abbr}`;
+  });
   const values = [...map.values()];
   return {labels, values};
 }
@@ -454,11 +485,7 @@ function renderCharts(){
   barChart = new Chart(ctx1, {
     type:'bar',
     data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]},
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label: (c)=>`€ ${c.parsed.y.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}`}}},
-      scales:{y:{beginAtZero:true},x:{}}
-    }
+    options:{responsive:true, plugins:{legend:{display:false}}}
   });
 
   if(pieChart) pieChart.destroy();
@@ -469,28 +496,41 @@ function renderCharts(){
   });
 }
 
-// ---------- Calendario simple (por día/hora) ----------
+// ---------- Calendario (con iniciales del día + estadías) ----------
 function buildCalendar(){
   const grid = document.getElementById('calendarGrid');
   grid.innerHTML='';
-  // Agrupar por fecha
   const byDate = {};
+  // eventos del itinerario
   for(const it of state.itinerario){
-    const [fecha,hora,lugar,act,costo] = it;
+    const [fecha,hora,lugar,act] = it;
     const key = fecha||'Sin fecha';
     if(!byDate[key]) byDate[key]=[];
-    byDate[key].push({hora:hora||'', lugar, act, costo});
+    byDate[key].push({hora:hora||'', lugar, act});
   }
-  // Ordenar fechas (dd/mm/aaaa)
+  // expandir estadías día por día
+  (state.stays||[]).forEach(st=>{
+    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
+    if(!isNaN(from) && !isNaN(to)){
+      for(let d=from; d<=to; d=addDays(d,1)){
+        const key = formatDMY(d);
+        if(!byDate[key]) byDate[key]=[];
+        byDate[key].push({hora:'00:00', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'});
+      }
+    }
+  });
+  // ordenar y pintar
   const keys = Object.keys(byDate).sort((a,b)=>{
     const pa=a.split('/').reverse().join('-');
     const pb=b.split('/').reverse().join('-');
     return pa.localeCompare(pb);
   });
   for(const k of keys){
+    const dt = parseDMY(k);
+    const wd = isNaN(dt)?'':weekdayShortEs(dt); // iniciales del día en español
     const col = document.createElement('div');
     col.className='day-col';
-    col.innerHTML = `<div class="day-header">${k}</div>`;
+    col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`;
     const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||''));
     for(const it of items){
       const el = document.createElement('div');
@@ -500,6 +540,14 @@ function buildCalendar(){
     }
     grid.appendChild(col);
   }
+}
+
+// ---------- Auto-ajuste de la columna Detalle (en ch) ----------
+function autosizeDetailColumn(){
+  const arr = state.detalle.map(r=> (r.det||'').length);
+  const max = Math.max(20, ...arr); // mínimo 20ch
+  const capped = Math.min(max, 60); // tope 60ch para no romper móvil
+  document.documentElement.style.setProperty('--detail-ch', capped+'ch');
 }
 
 // ---------- Init ----------
