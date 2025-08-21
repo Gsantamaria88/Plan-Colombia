@@ -12,24 +12,25 @@
       --bg:#f6f7fb;--card:#ffffff;--muted:#5b6476;--text:#0b1020;--text-soft:#334155;
       --primary:#059669;--accent:#2563eb;--ring:#e2e8f0;--border:#e5e7eb;--chip:#eef2ff;
       --table-row:#f8fafc;--shadow:rgba(2,6,23,.08);
-      /* Anchuras controladas */
-      --detail-max: clamp(34ch, 55vw, 65ch); /* máx 65c, adapta a viewport */
-      --cop-ch: 14ch;   /* COP fijo */
-      --eur-col: 68px;  /* € compacto */
-      --cat-col: 110px; /* categoría aún más compacta */
-      --action-col: 40px; /* icono eliminar */
-      --container-max: 940px; /* evita que se vea gigante en PC */
+      /* Columnas y límites */
+      --container-max: 1040px; /* centrado y contenido cómodo en desktop */
+      --cat-min: 88px; --cat-max: 140px;
+      --eur-min: 62px; --eur-max: 72px;
+      --cop-min: 120px; --cop-max: 14ch; /* ~14 caracteres */
+      --det-min: 260px; --det-ideal: 50%; --det-max: 65ch; /* pedido: 65c */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     html{-webkit-text-size-adjust:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:16px}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:16px;overflow-x:hidden}
     @media (max-width:600px){body{font-size:17px}}
-    /* Contenedor fluido y centrado sin huecos */
-    .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:clamp(10px,4vw,16px)}
-    .grid{display:grid;gap:12px}
-    .cards{grid-template-columns:1fr}
-    @media(min-width:1024px){.cards{grid-template-columns:1fr 1fr}}
+
+    /* Contenedor centrado SIEMPRE (sin huecos laterales) */
+    .container{width:min(100%, var(--container-max));margin-inline:auto;padding-inline:clamp(10px,3vw,16px)}
+
+    /* 1 sola columna SIEMPRE: evita espacios raros en pantallas grandes */
+    .cards{display:grid;grid-template-columns:1fr;gap:12px}
+
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 10px 14px;box-shadow:0 8px 24px var(--shadow)}
     h1{font-size:clamp(18px,2.2vw,22px);margin:8px 0 10px}
     h2{font-size:clamp(15px,1.8vw,18px);margin:0 0 8px;color:var(--text-soft)}
@@ -41,14 +42,17 @@
     button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;color:white;font-weight:700}
     button.warn{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
 
-    /* Tablas 100% responsive; SIN scroll del body en iPhone */
+    /* Tablas: SIN que empujen al body; scroll solo dentro del wrapper si hiciera falta */
     .table-wrap{width:100%;overflow-x:auto;overscroll-behavior:contain}
     table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
-    colgroup col.col-cat{width:var(--cat-col)}
-    colgroup col.col-det{width:var(--detail-max)}
-    colgroup col.col-eur{width:var(--eur-col)}
-    colgroup col.col-cop{width:var(--cop-ch)}
-    colgroup col.col-act{width:var(--action-col)}
+
+    /* colgroup con CLAMP => asegura % + límites en px/ch y nunca desborda */
+    colgroup col.col-cat{width:clamp(var(--cat-min), 16%, var(--cat-max))}
+    colgroup col.col-det{width:clamp(var(--det-min), var(--det-ideal), var(--det-max))}
+    colgroup col.col-eur{width:clamp(var(--eur-min), 8%, var(--eur-max))}
+    colgroup col.col-cop{width:clamp(var(--cop-min), 22%, var(--cop-max))}
+    colgroup col.col-act{width:40px}
+
     th,td{text-align:left;padding:8px 10px;vertical-align:middle}
     thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
     tbody tr{background:var(--table-row);border:1px solid var(--border)}
@@ -57,28 +61,29 @@
     .note{font-size:12px;color:var(--muted)}
 
     /* Inputs compactos */
-    .eur-input{width:100%;max-width:60px;text-align:right}
+    .eur-input{width:100%;max-width:64px;text-align:right}
     .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
 
     /* Gráficas */
     canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:12px;padding:6px}
     .section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px}
 
-    /* Calendario: Lista y Agenda */
+    /* Calendario */
     .calendar{overflow:auto}
     .calendar-tabs{display:flex;gap:8px;margin-bottom:8px}
     .tab{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer}
     .tab.active{background:#eef2ff;border-color:#c7d2fe}
 
-    .calendar-list{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:10px}
-    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:340px}
+    .calendar-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:220px}
     .day-header{font-weight:700;color:var(--text-soft);margin-bottom:6px;display:flex;justify-content:space-between}
     .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:6px}
     .slot .time{font-size:12px;color:#64748b}
     .slot .title{font-size:14px}
     .wx{font-size:12px;color:#334155;margin-top:2px}
 
-    .agenda-wrap{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:10px}
+    /* Agenda tipo Teams */
+    .agenda-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
     .agenda-day{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px}
     .agenda-header{display:flex;justify-content:space-between;color:var(--text-soft);font-weight:700;margin-bottom:6px}
     .hours{position:relative;height:900px;border-left:1px solid #e5e7eb}
@@ -89,7 +94,7 @@
     .block .btitle{font-size:13px}
     .stay{background:#ecfccb;border-color:#d9f99d}
 
-    /* Modales: forzar ocultos por defecto (evita que aparezcan al fondo en GH Pages) */
+    /* Modales (ocultos por defecto) */
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
     .modal .box{background:white;color:#0b1020;border:1px solid #e5e7eb;border-radius:16px;max-width:520px;width:100%;padding:16px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
     .modal .row{gap:8px}
@@ -102,8 +107,8 @@
   <div class="container">
     <h1>Plan de Viaje — Presupuesto & Itinerario</h1>
 
-    <div class="grid cards">
-      <!-- Card: Gráficos + FX -->
+    <div class="cards">
+      <!-- Gráficos + FX -->
       <section class="card">
         <div class="section-title">
           <h2>Gráficos (gastos en € por categoría)</h2>
@@ -120,7 +125,7 @@
         <p class="note">Los gráficos usan importes en euros. Las tablas muestran € y COP (según el tipo de cambio editable).</p>
       </section>
 
-      <!-- Card: Presupuesto Detallado -->
+      <!-- Presupuesto Detallado -->
       <section class="card" id="card-presupuesto">
         <div class="section-title">
           <h2>Presupuesto detallado</h2>
@@ -138,7 +143,7 @@
             </colgroup>
             <thead>
               <tr>
-                <th>Categoría</th>
+                <th>Cat</th>
                 <th>Detalle (máx 65c)</th>
                 <th class="right">€</th>
                 <th class="right">COP</th>
@@ -159,7 +164,7 @@
         </div>
       </section>
 
-      <!-- Card: Itinerario -->
+      <!-- Itinerario -->
       <section class="card">
         <div class="section-title">
           <h2>Itinerario (costos por día)</h2>
@@ -198,7 +203,7 @@
         </div>
       </section>
 
-      <!-- Card: Calendario -->
+      <!-- Calendario -->
       <section class="card">
         <div class="section-title">
           <h2>Calendario (lista y agenda por hora)</h2>
@@ -212,7 +217,7 @@
           <div id="calendarList" class="calendar-list"></div>
           <div id="calendarAgenda" class="agenda-wrap" style="display:none"></div>
         </div>
-        <p class="note">Clima: promedio mensual (si falla la API, se usa tabla local). Para pronóstico real podemos activarlo cerca de la fecha.</p>
+        <p class="note">Clima: promedio mensual (sin llamadas externas si no son necesarias). Para pronóstico real podemos activarlo cerca de la fecha.</p>
       </section>
 
     </div>
@@ -258,7 +263,7 @@
   <div id="modalSync" class="modal" aria-hidden="true" style="display:none">
     <div class="box">
       <h3>Guardar cambios en GitHub</h3>
-      <p class="note">Se guardará el JSON de tu plan en tu repositorio. Tus credenciales se guardan <b>solo</b> en este navegador (localStorage).</p>
+      <p class="note">Se guardará el JSON de tu plan en tu repositorio. El PAT queda <b>solo en este navegador</b> (localStorage).</p>
       <div class="row"><label>Repo (usuario/repo)</label><input id="ghRepo" type="text" placeholder="usuario/plan-colombia"/></div>
       <div class="row"><label>Branch</label><input id="ghBranch" type="text" value="main"/></div>
       <div class="row"><label>Ruta del archivo</label><input id="ghPath" type="text" value="data/plan.json"/></div>
@@ -269,19 +274,15 @@
   </div>
 
 <script>
-// ---------- Abreviaturas ----------
+// ---------- Abreviaturas visuales ----------
 const CITY_ABBR = [
   [/bogotá/gi,'BOG'], [/medellín/gi,'MDE'], [/armenia/gi,'AXM'], [/madrid/gi,'MAD'],
   [/aeropuerto/gi,'Apto'], [/jose maria c[oó]rdoba|jos[eé] mar[ií]a c[oó]rdoba|jmc/gi,'JMC'],
-  [/el dorado/gi,'El Dorado']
+  [/el dorado/gi,'El Dorado'], [/logroño|lgr/gi,'LGR']
 ];
-function abbrText(s){
-  let t = s||''; CITY_ABBR.forEach(([re,rep])=>{ t = t.replace(re,rep); });
-  if(t.length>65) t = t.slice(0,62)+'…';
-  return t;
-}
+function abbrText(s){ let t = s||''; CITY_ABBR.forEach(([re,rep])=>{ t = t.replace(re,rep); }); return t.length>65 ? t.slice(0,62)+'…' : t; }
 
-// ---------- Categorías con iconos/abreviaturas ----------
+// ---------- Categorías ----------
 const CATEGORY_DEFS = {
   VUE:{label:'Vuelos', icon:'✈️', abbr:'VUE'},
   TRN_BTA:{label:'Transporte Bogotá', icon:'🚕', abbr:'TRN-BTA'},
@@ -300,17 +301,17 @@ const CATEGORY_DEFS = {
 const SAMPLE = {
   fx: 4678.18,
   detalle: [
-    {cat:'VUE', det:'Jetsmart Bogotá → Medellín (3 pax con equipaje)', eur:120},
-    {cat:'VUE', det:'Avianca Medellín → Armenia (3 pax con equipaje)', eur:140},
-    {cat:'VUE', det:'Wingo Armenia → Bogotá (3 pax con equipaje)', eur:130},
-    {cat:'TRN_BTA', det:'Uber Suba ↔ Aeropuerto El Dorado (ida/vuelta, estimado)', eur:22},
-    {cat:'TRN_MDE', det:'Uber JMC → Medellín (ida, estimado)', eur:7},
-    {cat:'TRN_MDE', det:'Uber Medellín → JMC (vuelta, estimado)', eur:7},
-    {cat:'TRN_AXM', det:'Traslados locales Armenia/Quindío (misceláneos)', eur:18},
+    {cat:'VUE', det:'Jetsmart BOG → MDE (3 pax con equipaje)', eur:120},
+    {cat:'VUE', det:'Avianca MDE → AXM (3 pax con equipaje)', eur:140},
+    {cat:'VUE', det:'Wingo AXM → BOG (3 pax con equipaje)', eur:130},
+    {cat:'TRN_BTA', det:'Uber Suba ↔ Apto El Dorado (ida/vuelta, estim.)', eur:22},
+    {cat:'TRN_MDE', det:'Uber JMC → MDE (ida, estim.)', eur:7},
+    {cat:'TRN_MDE', det:'Uber MDE → JMC (vuelta, estim.)', eur:7},
+    {cat:'TRN_AXM', det:'Traslados locales AXM/Quindío (miscel.)', eur:18},
     {cat:'RENT', det:'Alquiler Kia Picanto (5 días)', eur:180},
-    {cat:'RENT', det:'Seguro adicional (estimado)', eur:50},
+    {cat:'RENT', det:'Seguro adicional (estim.)', eur:50},
     {cat:'RENT', det:'Gasolina + peajes (5 días)', eur:40},
-    {cat:'STY_MDE', det:'Apartamento Medellín (4 noches)', eur:226},
+    {cat:'STY_MDE', det:'Apto MDE (4 noches)', eur:226},
     {cat:'STY_AXM', det:'Casa Circasia (5 noches)', eur:160},
     {cat:'TOUR_MDE', det:'Free tour Comuna 13 (propina 10 €/pax x3)', eur:30},
     {cat:'TOUR_MDE', det:'Tour Guatapé (30 €/pax x3)', eur:90},
@@ -429,38 +430,31 @@ function renderTables(){
 function renderTotals(){ const totalE = state.detalle.reduce((a,b)=>a+(+b.eur||0),0); const totalC = totalE * state.fx; document.getElementById('total-eur').textContent = fmtEUR(totalE); document.getElementById('total-cop').textContent = fmtCOP(totalC); }
 function renderItTotals(){ const tE = state.itinerario.reduce((a,b)=>a+(+b[4]||0),0); const tC = tE * state.fx; document.getElementById('tot-it-eur').textContent = fmtEUR(tE); document.getElementById('tot-it-cop').textContent = fmtCOP(tC); }
 
-// ---------- Charts ----------
+// ---------- Gráficos ----------
 let barChart, pieChart;
 function groupByCategory(){ const map = new Map(); const txt = (document.getElementById('filterText').value||'').toLowerCase(); const cat = document.getElementById('filterCat').value||''; state.detalle.filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt))).forEach(r=>{ map.set(r.cat, (map.get(r.cat)||0) + (+r.eur||0)); }); const labels = [...map.keys()].map(k=>{ const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k}; return `${d.icon} ${d.abbr}`; }); const values = [...map.values()]; return {labels, values}; }
 function renderCharts(){ const {labels, values} = groupByCategory(); const ctx1 = document.getElementById('barChart'); const ctx2 = document.getElementById('pieChart'); const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981']; if(barChart) barChart.destroy(); barChart = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{display:false}}} }); if(pieChart) pieChart.destroy(); pieChart = new Chart(ctx2, { type:'pie', data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{position:'bottom'}}} }); }
 
-// ---------- Clima: API + fallback local ----------
-const CITY_COORD = { 'BOG': {lat:4.701, lon:-74.146}, 'MDE': {lat:6.219, lon:-75.590}, 'AXM': {lat:4.453, lon:-75.766}, 'MAD': {lat:40.471, lon:-3.562} };
-const CLIMATE_FALLBACK = { // medias aprox °C y precip (mm/día) por mes
+// ---------- Clima (sin dependencia de red por defecto) ----------
+const CLIMATE_LOCAL = {
   BOG:{'09':{tmin:9,tmax:20,pp:3},'10':{tmin:9,tmax:19,pp:5}},
   MDE:{'09':{tmin:17,tmax:28,pp:6},'10':{tmin:17,tmax:27,pp:7}},
   AXM:{'09':{tmin:16,tmax:26,pp:7},'10':{tmin:16,tmax:25,pp:8}},
   MAD:{'09':{tmin:15,tmax:28,pp:1},'10':{tmin:11,tmax:21,pp:2}},
 };
-let climateCache = {};
-async function loadClimate(code){ if(climateCache[code]) return climateCache[code]; const {lat,lon} = CITY_COORD[code]||{}; if(!lat) return {}; const url = `https://climate-api.open-meteo.com/v1/climate?latitude=${lat}&longitude=${lon}&start_month=01&end_month=12&daily=temperature_2m_max_mean,temperature_2m_min_mean,precipitation_sum_mean`; try{ const res = await fetch(url,{mode:'cors'}); const j = await res.json(); const out = {}; (j?.daily?.time||[]).forEach((d,i)=>{ const m=d.split('-')[1]; out[m]={ tmin:j.daily.temperature_2m_min_mean?.[i]??null, tmax:j.daily.temperature_2m_max_mean?.[i]??null, pp:j.daily.precipitation_sum_mean?.[i]??null }; }); climateCache[code]=out; return out; }catch(e){ return CLIMATE_FALLBACK[code]||{}; } }
-function pickCityCode(text){ const t=(text||'').toUpperCase(); if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE'; if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM'; if(t.includes('BOG')||t.includes('SUBA')) return 'BOG'; if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('MADRID')||t.includes('LGR')||t.includes('LOGRO')) return 'MAD'; return 'MDE'; }
-async function getWxFor(dateStr, placeText){ const code = pickCityCode(abbrText(placeText||'')); const month = (dateStr||'01/01/2000').split('/')[1]; const climate = await loadClimate(code); const m = climate?.[month] || (CLIMATE_FALLBACK[code]?.[month]) || {}; const rainy = (m.pp||0) > 2; return { code, tmin: m.tmin, tmax: m.tmax, rainy }; }
+function pickCityCode(text){ const t=(text||'').toUpperCase(); if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE'; if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM'; if(t.includes('BOG')||t.includes('SUBA')) return 'BOG'; if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('LGR')||t.includes('LOGRO')) return 'MAD'; return 'MDE'; }
+function getWxLocal(dateStr, placeText){ const code = pickCityCode(abbrText(placeText||'')); const month = (dateStr||'01/01/2000').split('/')[1]; const m = (CLIMATE_LOCAL[code]||{})[month]||{}; const rainy = (m.pp||0) > 2; return { code, tmin: m.tmin, tmax: m.tmax, rainy }; }
 
 // ---------- Calendarios ----------
 function switchCal(which){ document.getElementById('tabList').classList.toggle('active', which==='list'); document.getElementById('tabAgenda').classList.toggle('active', which==='agenda'); document.getElementById('calendarList').style.display = which==='list'? 'grid':'none'; document.getElementById('calendarAgenda').style.display = which==='agenda'? 'grid':'none'; }
-async function buildCalendars(){ buildListCalendar(); await buildAgendaCalendar(); }
-async function buildListCalendar(){ const host = document.getElementById('calendarList'); host.innerHTML=''; const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'', lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'00:00', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='day-col'; col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`; const wx = await getWxFor(k, byDate[k][0]?.lugar||''); const wxp = document.createElement('div'); const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||'')); for(const it of items){ const el = document.createElement('div'); el.className='slot'; el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el); } host.appendChild(col); } }
-async function buildAgendaCalendar(){ const host = document.getElementById('calendarAgenda'); host.innerHTML=''; const HSTART=6, HEND=22, PIX_PER_H=54; function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H; } const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'08:00', dur:60, lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'07:00', dur:90, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='agenda-day'; col.innerHTML = `<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`; const wx = await getWxFor(k, byDate[k][0]?.lugar||''); const wxp = document.createElement('div'); wxp.className='wx'; const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const hours = document.createElement('div'); hours.className='hours'; for(let h=HSTART; h<=HEND; h++){ const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line); const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label); } const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||'')); for(const it of items){ const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H; const block = document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top = top+'px'; block.style.height = hpx+'px'; block.innerHTML = `<div class=\"btime\">${it.hora} · ${abbrText(it.lugar)}</div><div class=\"btitle\">${abbrText(it.act)}</div>`; hours.appendChild(block); } col.appendChild(hours); host.appendChild(col); } }
+function buildCalendars(){ buildListCalendar(); buildAgendaCalendar(); }
+function buildListCalendar(){ const host = document.getElementById('calendarList'); host.innerHTML=''; const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'', lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'00:00', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='day-col'; col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`; const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||'')); for(const it of items){ const el = document.createElement('div'); el.className='slot'; el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el); } host.appendChild(col); } }
+function buildAgendaCalendar(){ const host = document.getElementById('calendarAgenda'); host.innerHTML=''; const HSTART=6, HEND=22, PIX_PER_H=54; function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H; } const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'08:00', dur:60, lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'07:00', dur:90, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='agenda-day'; col.innerHTML = `<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`; const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const hours = document.createElement('div'); hours.className='hours'; for(let h=HSTART; h<=HEND; h++){ const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line); const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label); } const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||'')); for(const it of items){ const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H; const block = document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top = top+'px'; block.style.height = hpx+'px'; block.innerHTML = `<div class=\"btime\">${it.hora} · ${abbrText(it.lugar)}</div><div class=\"btitle\">${abbrText(it.act)}</div>`; hours.appendChild(block); } col.appendChild(hours); host.appendChild(col); } }
 
-// ---------- Sync con GitHub (cliente) ----------
+// ---------- Sync GitHub ----------
 function openSyncModal(){ document.getElementById('modalSync').style.display='flex'; const repo = localStorage.getItem('ghRepo')||''; const branch = localStorage.getItem('ghBranch')||'main'; const path = localStorage.getItem('ghPath')||'data/plan.json'; document.getElementById('ghRepo').value=repo; document.getElementById('ghBranch').value=branch; document.getElementById('ghPath').value=path; }
 function closeSyncModal(){ document.getElementById('modalSync').style.display='none'; }
-async function saveToGitHub(){ const repo = document.getElementById('ghRepo').value.trim(); const branch = document.getElementById('ghBranch').value.trim(); const path = document.getElementById('ghPath').value.trim(); const token = document.getElementById('ghToken').value.trim(); const msg = document.getElementById('syncMsg'); if(!repo||!branch||!path||!token){ msg.textContent='Completa todos los campos.'; return; } localStorage.setItem('ghRepo',repo); localStorage.setItem('ghBranch',branch); localStorage.setItem('ghPath',path); try{ const content = btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2)))); const headers = { 'Authorization': `token ${token}`, 'Accept':'application/vnd.github+json' }; // obtener SHA si existe
-    const getUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`;
-    let sha=null; const getRes = await fetch(getUrl,{headers}); if(getRes.ok){ const j=await getRes.json(); sha=j.sha; }
-    const putUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}`;
-    const body = { message:'update plan.json', content, branch, sha }; const putRes = await fetch(putUrl,{ method:'PUT', headers, body: JSON.stringify(body)}); if(!putRes.ok){ const t=await putRes.text(); throw new Error(t); } msg.textContent='¡Guardado en GitHub!'; } catch(e){ msg.textContent='Error guardando en GitHub: '+e.message; } }
+async function saveToGitHub(){ const repo = document.getElementById('ghRepo').value.trim(); const branch = document.getElementById('ghBranch').value.trim(); const path = document.getElementById('ghPath').value.trim(); const token = document.getElementById('ghToken').value.trim(); const msg = document.getElementById('syncMsg'); if(!repo||!branch||!path||!token){ msg.textContent='Completa todos los campos.'; return; } localStorage.setItem('ghRepo',repo); localStorage.setItem('ghBranch',branch); localStorage.setItem('ghPath',path); try{ const content = btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2)))); const headers = { 'Authorization': `token ${token}`, 'Accept':'application/vnd.github+json' }; const getUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`; let sha=null; const getRes = await fetch(getUrl,{headers}); if(getRes.ok){ const j=await getRes.json(); sha=j.sha; } const putUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}`; const body = { message:'update plan.json', content, branch, sha }; const putRes = await fetch(putUrl,{ method:'PUT', headers, body: JSON.stringify(body)}); if(!putRes.ok){ const t=await putRes.text(); throw new Error(t); } msg.textContent='¡Guardado en GitHub!'; } catch(e){ msg.textContent='Error guardando en GitHub: '+e.message; } }
 
 // ---------- Init ----------
 render();
