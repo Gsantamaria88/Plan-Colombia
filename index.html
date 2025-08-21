@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,16 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b1020;--card:#121830;--muted:#8590a6;--text:#e5e7eb;--text-soft:#cbd5e1;
-      --primary:#10b981;--accent:#60a5fa;--ring:#1f2937;--border:#1f2a44;--chip:#0b1224;
-      --table-row:#0b1224;--shadow:rgba(0,0,0,.25);
-      --ok:#065f46;--warn:#92400e;--err:#7f1d1d;
-    }
-    [data-theme="light"]{
       --bg:#f6f7fb;--card:#ffffff;--muted:#5b6476;--text:#0b1020;--text-soft:#334155;
       --primary:#059669;--accent:#2563eb;--ring:#e2e8f0;--border:#e5e7eb;--chip:#eef2ff;
       --table-row:#f8fafc;--shadow:rgba(2,6,23,.08);
-      --ok:#d1fae5;--warn:#fef3c7;--err:#fee2e2;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -26,42 +19,54 @@
     .container{max-width:1100px;margin:24px auto;padding:0 16px}
     .grid{display:grid;gap:16px}
     .cards{grid-template-columns:1fr}
-    @media(min-width:960px){.cards{grid-template-columns:1fr 1fr}}
+    @media(min-width:1000px){.cards{grid-template-columns:1fr 1fr}}
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px var(--shadow)}
     h1{font-size:20px;margin:0 0 10px 0}
     h2{font-size:16px;margin:0 0 10px 0;color:var(--text-soft)}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .chip{background:var(--chip);border:1px solid var(--border);border-radius:999px;padding:8px 12px;color:var(--muted)}
     label{font-size:12px;color:var(--muted)}
     input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;outline:none}
-    input[type="number"]:focus,input[type="text"]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
-    button{background:#111827;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;cursor:pointer}
-    [data-theme="light"] button{background:#f1f5f9}
-    button.primary{background:linear-gradient(135deg,var(--primary),#22d3ee);border:none;color:#0b1020;font-weight:700}
-    button.warn{background:#1f2937;border-color:#374151;color:#fef3c7}
+    input[type="number"]:focus,input[type="text"]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+    button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;cursor:pointer}
+    button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;color:white;font-weight:700}
+    button.warn{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
     table{width:100%;border-collapse:separate;border-spacing:0 8px}
     th,td{text-align:left;padding:10px 12px}
     thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
     tbody tr{background:var(--table-row);border:1px solid var(--border)}
-    tbody td{border-top:1px solid rgba(255,255,255,.02)}
     tfoot td{border-top:1px solid var(--border);color:var(--text-soft);font-weight:700}
     .right{text-align:right}
     .note{font-size:12px;color:var(--muted)}
     canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:16px;padding:8px}
     .section-title{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
-    .switch{position:relative;display:inline-block;width:52px;height:28px}
-    .switch input{opacity:0;width:0;height:0}
-    .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#334155;transition:.3s;border-radius:999px;border:1px solid var(--border)}
-    .slider:before{position:absolute;content:"";height:22px;width:22px;left:3px;top:2px;background:white;transition:.3s;border-radius:50%}
-    input:checked + .slider{background:#16a34a}
-    input:checked + .slider:before{transform:translateX(24px)}
-    /* Legibilidad y compactación */
+
+    /* Compactación y legibilidad */
     td input[type="text"]{min-width:120px;max-width:100%;width:100%}
     .wrap{white-space:normal;word-break:break-word}
     .ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .compact td:first-child,.compact td:nth-child(2){max-width:220px}
-    @media (max-width:600px){.compact td:first-child,.compact td:nth-child(2){max-width:140px}}
-    .status{border:1px solid var(--border);border-radius:999px;padding:6px 10px}
+
+    /* Columna € estrecha */
+    .eur-col{width:90px;}
+    .eur-input{width:100%;max-width:80px;text-align:right}
+
+    /* Botón eliminar como icono */
+    .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal .box{background:white;color:#0b1020;border:1px solid #e5e7eb;border-radius:16px;max-width:520px;width:100%;padding:16px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+    .modal .row{gap:8px}
+    .modal .box h3{margin:0 0 8px 0}
+    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+    /* Calendario estilo columnas */
+    .calendar{overflow:auto}
+    .calendar-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px}
+    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:420px}
+    .day-header{font-weight:700;color:var(--text-soft);margin-bottom:8px}
+    .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:8px}
+    .slot .time{font-size:12px;color:#64748b}
+    .slot .title{font-size:14px}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -69,16 +74,7 @@
   <div class="container">
     <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
       <h1>Plan de Viaje — Colombia · Presupuesto & Itinerario</h1>
-      <div class="row" style="gap:12px">
-        <span id="testStatus" class="status chip">Cargando…</span>
-        <label for="themeToggle" class="note">Tema claro/oscuro</label>
-        <label class="switch"><input id="themeToggle" type="checkbox"><span class="slider"></span></label>
-      </div>
-    </div>
-    <div class="row" style="gap:12px;margin:6px 0 16px">
-      <span class="chip">Editable · Offline (localStorage)</span>
-      <span class="chip">Filtros + Charts dinámicos</span>
-      <span class="chip">Exportar / Importar</span>
+      <!-- elementos informativos removidos por petición -->
     </div>
 
     <div class="grid cards">
@@ -104,16 +100,11 @@
           <h2>Presupuesto detallado</h2>
           <div class="row">
             <select id="filterCat" onchange="applyFilter()">
-              <option value="">Todas las categorías</option>
+              <option value="">Todas</option>
             </select>
             <input id="filterText" type="text" placeholder="Filtrar por texto…" oninput="applyFilter()" />
-            <label class="note"><input id="compactToggle" type="checkbox" onchange="toggleCompact()"> Compactar texto</label>
-            <button onclick="addRow()">+ Añadir</button>
+            <button class="primary" onclick="openAddModal()">+ Añadir</button>
             <button class="warn" onclick="resetData()">Restablecer</button>
-            <button onclick="exportJSON()">Exportar JSON</button>
-            <button onclick="downloadCSV('presupuesto.csv', toCSV(state.detalle))">Exportar CSV</button>
-            <input type="file" id="importFile" accept="application/json" style="display:none" />
-            <button onclick="document.getElementById('importFile').click()">Importar</button>
           </div>
         </div>
         <table>
@@ -121,12 +112,12 @@
             <tr>
               <th style="width:160px">Categoría</th>
               <th>Detalle</th>
-              <th class="right">€</th>
+              <th class="right eur-col">€</th>
               <th class="right">COP</th>
               <th></th>
             </tr>
           </thead>
-          <tbody id="tbody-detalle" class="wrap"></tbody>
+          <tbody id="tbody-detalle" class="wrap ellipsis"></tbody>
           <tfoot>
             <tr>
               <td></td>
@@ -145,23 +136,25 @@
           <h2>Itinerario (costos por día)</h2>
           <div class="row">
             <input id="filterIt" type="text" placeholder="Filtrar por lugar/actividad…" oninput="applyFilter()" />
-            <button onclick="addItRow()">+ Añadir día</button>
+            <button class="primary" onclick="openAddItModal()">+ Añadir día</button>
           </div>
         </div>
         <table>
           <thead>
             <tr>
               <th style="width:120px">Fecha</th>
+              <th style="width:80px">Hora</th>
               <th style="width:200px">Lugar</th>
               <th>Actividad</th>
-              <th class="right">Costo €</th>
+              <th class="right eur-col">Costo €</th>
               <th class="right">Costo COP</th>
               <th></th>
             </tr>
           </thead>
-          <tbody id="tbody-it" class="wrap"></tbody>
+          <tbody id="tbody-it" class="wrap ellipsis"></tbody>
           <tfoot>
             <tr>
+              <td></td>
               <td></td>
               <td></td>
               <td class="right">TOTAL</td>
@@ -172,45 +165,118 @@
           </tfoot>
         </table>
       </section>
+
+      <!-- Card: Calendario (vista semanal simple) -->
+      <section class="card">
+        <div class="section-title"><h2>Calendario (vista por día y hora)</h2></div>
+        <div class="calendar">
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </div>
+        <p class="note">Los eventos se ordenan por hora dentro de cada día.</p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Modal añadir presupuesto -->
+  <div id="modalAdd" class="modal" aria-hidden="true">
+    <div class="box">
+      <h3>Agregar ítem al presupuesto</h3>
+      <div class="row">
+        <label>Categoria</label>
+        <select id="mCat"></select>
+      </div>
+      <div class="row">
+        <label>Detalle</label>
+        <input id="mDet" type="text" placeholder="Descripción" />
+      </div>
+      <div class="row">
+        <label>Euros (€)</label>
+        <input id="mEur" type="number" step="0.01" value="0" />
+      </div>
+      <div class="actions">
+        <button onclick="closeAddModal()">Cancelar</button>
+        <button class="primary" onclick="confirmAdd()">Añadir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal añadir itinerario -->
+  <div id="modalAddIt" class="modal" aria-hidden="true">
+    <div class="box">
+      <h3>Agregar día al itinerario</h3>
+      <div class="row"><label>Fecha</label><input id="miFecha" type="text" placeholder="dd/mm/aaaa" /></div>
+      <div class="row"><label>Hora</label><input id="miHora" type="text" placeholder="hh:mm" /></div>
+      <div class="row"><label>Lugar</label><input id="miLugar" type="text" placeholder="Ciudad / trayecto" /></div>
+      <div class="row"><label>Actividad</label><input id="miAct" type="text" placeholder="Descripción" /></div>
+      <div class="row"><label>Costo €</label><input id="miEur" type="number" step="0.01" value="0" /></div>
+      <div class="actions">
+        <button onclick="closeAddItModal()">Cancelar</button>
+        <button class="primary" onclick="confirmAddIt()">Añadir</button>
+      </div>
     </div>
   </div>
 
 <script>
-// ---------- Estado inicial ----------
+// ---------- Diccionario de categorías con iconos/abreviaturas ----------
+const CATEGORY_DEFS = {
+  VUE:{label:'Vuelos', icon:'✈️', abbr:'VUE'},
+  TRN_BTA:{label:'Transporte Bogotá', icon:'🚕', abbr:'TRN-BTA'},
+  TRN_MDE:{label:'Transporte Medellín', icon:'🚕', abbr:'TRN-MDE'},
+  TRN_AXM:{label:'Transporte Armenia', icon:'🚕', abbr:'TRN-AXM'},
+  RENT:{label:'Alquiler coche Armenia', icon:'🚗', abbr:'RENT'},
+  STY_MDE:{label:'Estadía Medellín', icon:'🏠', abbr:'STY-MDE'},
+  STY_AXM:{label:'Estadía Armenia', icon:'🏠', abbr:'STY-AXM'},
+  TOUR_MDE:{label:'Tours Medellín', icon:'🎧', abbr:'TOUR-MDE'},
+  TOUR_EJE:{label:'Tours Eje Cafetero', icon:'🌴', abbr:'TOUR-EJE'},
+  EXTRA:{label:'Extra', icon:'➕', abbr:'EXT'},
+  ROAD_ES:{label:'Roadtrip España', icon:'🚙', abbr:'ROAD-ES'}
+};
+
+// ---------- Estado inicial (incluye nuevos datos del punto 11/12) ----------
 const SAMPLE = {
   fx: 4678.18,
   detalle: [
-    {cat:"Vuelos", det:"Jetsmart Bogotá → Medellín (3 pax con equipaje)", eur:120},
-    {cat:"Vuelos", det:"Avianca Medellín → Armenia (3 pax con equipaje)", eur:140},
-    {cat:"Vuelos", det:"Wingo Armenia → Bogotá (3 pax con equipaje)", eur:130},
-    {cat:"Transporte Bogotá", det:"Uber Suba → Aeropuerto (ida y vuelta)", eur:20},
-    {cat:"Transporte Medellín", det:"Uber Aeropuerto JMC → Medellín (ida)", eur:21},
-    {cat:"Transporte Medellín", det:"Uber Medellín → Aeropuerto JMC (vuelta)", eur:21},
-    {cat:"Transporte Armenia", det:"Traslados locales Armenia/Quindío (misceláneos)", eur:18},
-    {cat:"Alquiler coche Armenia", det:"Alquiler Kia Picanto (5 días)", eur:180},
-    {cat:"Alquiler coche Armenia", det:"Seguro adicional (estimado)", eur:50},
-    {cat:"Alquiler coche Armenia", det:"Gasolina + peajes (5 días)", eur:40},
-    {cat:"Estadía Medellín", det:"Apartamento Medellín (4 noches)", eur:226},
-    {cat:"Estadía Armenia", det:"Casa Circasia (5 noches)", eur:160},
-    {cat:"Tours Medellín", det:"Free tour Comuna 13 (propina 10 €/pax x3)", eur:30},
-    {cat:"Tours Medellín", det:"Tour Guatapé (30 €/pax x3)", eur:90},
-    {cat:"Tours Eje Cafetero", det:"Entrada Parque del Café (26 €/pax x3)", eur:78},
-    {cat:"Tours Eje Cafetero", det:"Entrada Valle del Cocora (4 €/pax x3)", eur:12},
-    {cat:"Tours Eje Cafetero", det:"Entrada Termales Santa Rosa (10 €/pax x3)", eur:30},
-    {cat:"Extra", det:"Bogotá → Villa de Leyva (bus 9 €/pax x3)", eur:27},
+    {cat:'VUE', det:'Jetsmart Bogotá → Medellín (3 pax con equipaje)', eur:120},
+    {cat:'VUE', det:'Avianca Medellín → Armenia (3 pax con equipaje)', eur:140},
+    {cat:'VUE', det:'Wingo Armenia → Bogotá (3 pax con equipaje)', eur:130},
+    {cat:'TRN_BTA', det:'Uber Suba ↔ Aeropuerto El Dorado (ida/vuelta, estimado)', eur:22},
+    {cat:'TRN_MDE', det:'Uber JMC → Medellín (ida, estimado)', eur:7},
+    {cat:'TRN_MDE', det:'Uber Medellín → JMC (vuelta, estimado)', eur:7},
+    {cat:'TRN_AXM', det:'Traslados locales Armenia/Quindío (misceláneos)', eur:18},
+    {cat:'RENT', det:'Alquiler Kia Picanto (5 días)', eur:180},
+    {cat:'RENT', det:'Seguro adicional (estimado)', eur:50},
+    {cat:'RENT', det:'Gasolina + peajes (5 días)', eur:40},
+    {cat:'STY_MDE', det:'Apartamento Medellín (4 noches)', eur:226},
+    {cat:'STY_AXM', det:'Casa Circasia (5 noches)', eur:160},
+    {cat:'TOUR_MDE', det:'Free tour Comuna 13 (propina 10 €/pax x3)', eur:30},
+    {cat:'TOUR_MDE', det:'Tour Guatapé (30 €/pax x3)', eur:90},
+    {cat:'TOUR_EJE', det:'Entrada Parque del Café (26 €/pax x3)', eur:78},
+    {cat:'TOUR_EJE', det:'Entrada Valle del Cocora (4 €/pax x3)', eur:12},
+    {cat:'TOUR_EJE', det:'Entrada Termales Santa Rosa (10 €/pax x3)', eur:30},
+    {cat:'EXTRA', det:'Bogotá → Villa de Leyva (bus 9 €/pax x3)', eur:27},
+    // Nuevos del punto 11/12
+    {cat:'ROAD_ES', det:'Parking Madrid-Barajas (26 Sep – 17 Oct)', eur:126},
+    {cat:'ROAD_ES', det:'Gasolina Logroño → Madrid (RAV4, estimado)', eur:35},
   ],
+  // Itinerario ahora con hora (HH:MM)
   itinerario: [
-    ["28/09/2025","Bogotá → Villa de Leyva","Bus a Villa de Leyva (3 pax)",27],
-    ["02/10/2025","Bogotá → Medellín","Vuelo Jetsmart + Ubers + Noche Medellín",177],
-    ["03/10/2025","Medellín","Free Tour Comuna 13 + Noche Medellín",86],
-    ["04/10/2025","Medellín","Tour Guatapé + Noche Medellín",146],
-    ["05/10/2025","Medellín","Pueblito Paisa + Metro/Metrocable + Noche Medellín",56],
-    ["06/10/2025","Medellín → Armenia","Vuelo Avianca + Uber + Noche Circasia + Seguro coche",243],
-    ["07/10/2025","Circasia/Quindío","Valle del Cocora + Salento + coche",106],
-    ["08/10/2025","Circasia/Quindío","Parque del Café + coche + Noche Circasia",154],
-    ["09/10/2025","Circasia/Quindío","Filandia + Termales + coche + Noche Circasia",106],
-    ["10/10/2025","Circasia/Quindío","Día libre + coche + Noche Circasia",76],
-    ["11/10/2025","Armenia → Bogotá","Coche + Gasolina + Vuelo Wingo + Uber",184],
+    ['26/09/2025','05:00','Logroño → Madrid','Conducir RAV4 al parking T1/T2/T3',0],
+    ['26/09/2025','08:30','Madrid (Barajas)','Llegada al parking · check-in',0],
+    ['26/09/2025','—','Madrid (Barajas)','Vuelo a Bogotá (pre-embarque)',0],
+    ['28/09/2025','09:00','Bogotá → Villa de Leyva','Bus a Villa de Leyva (3 pax)',27],
+    ['02/10/2025','14:30','Bogotá → Medellín','Vuelo Jetsmart + Uber + Noche MDE',177],
+    ['03/10/2025','09:30','Medellín','Free Tour Comuna 13 + Noche MDE',86],
+    ['04/10/2025','07:00','Medellín','Tour Guatapé + Noche MDE',146],
+    ['05/10/2025','10:00','Medellín','Pueblito Paisa + Metro/Metrocable + Noche',56],
+    ['06/10/2025','16:57','Medellín → Armenia','Vuelo Avianca + Uber + Noche Circasia + Seguro',243],
+    ['07/10/2025','08:00','Circasia/Quindío','Valle del Cocora + Salento + coche',106],
+    ['08/10/2025','09:00','Circasia/Quindío','Parque del Café + coche + Noche',154],
+    ['09/10/2025','09:00','Circasia/Quindío','Filandia + Termales + coche + Noche',106],
+    ['10/10/2025','10:00','Circasia/Quindío','Día libre + coche + Noche',76],
+    ['11/10/2025','18:50','Armenia → Bogotá','Coche + Gasolina + Vuelo Wingo + Uber',184],
+    ['16/10/2025','—','Bogotá → Madrid','Traslado a El Dorado (Uber XL, 3 pax + 1 gato)',25],
+    ['17/10/2025','10:00','Madrid (Barajas)','Recoger RAV4 y retorno a Logroño',0],
   ]
 };
 
@@ -218,23 +284,17 @@ let state = loadState();
 
 function loadState(){
   const raw = localStorage.getItem('colombia-plan');
-  const s = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SAMPLE));
-  const pref = localStorage.getItem('theme-pref');
-  if(pref) document.documentElement.setAttribute('data-theme', pref);
-  return s;
+  return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SAMPLE));
 }
 function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
 
-// ---------- Tema claro/oscuro ----------
-const themeToggle = () => {
-  const current = document.documentElement.getAttribute('data-theme')||'dark';
-  const next = current==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme-pref', next);
-  document.getElementById('themeToggle').checked = next==='light';
-};
+// ---------- Helpers ----------
+function clabel(key){ const c=CATEGORY_DEFS[key]||{icon:'🧾',abbr:key}; return `${c.icon} ${c.abbr}`; }
+function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
+function fmtEUR(n){return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0)}
+function fmtCOP(n){return new Intl.NumberFormat('es-CO').format(Math.round(n||0)) + ' COP'}
 
-// ---------- Tipo de cambio ----------
+// ---------- FX ----------
 function saveFX(){
   const v = parseFloat(document.getElementById('fx').value||'0');
   state.fx = isFinite(v) && v>0 ? v : state.fx; 
@@ -244,61 +304,72 @@ function saveFX(){
   renderItTotals();
 }
 
+// ---------- Modales ----------
+function openAddModal(){
+  const m=document.getElementById('modalAdd');
+  const sel=document.getElementById('mCat');
+  sel.innerHTML = Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join('');
+  m.style.display='flex';
+}
+function closeAddModal(){ document.getElementById('modalAdd').style.display='none'; }
+function confirmAdd(){
+  const k=document.getElementById('mCat').value;
+  const d=document.getElementById('mDet').value||'Nuevo ítem';
+  const e=num(document.getElementById('mEur').value);
+  state.detalle.push({cat:k, det:d, eur:e});
+  saveState(); closeAddModal(); render();
+}
+
+function openAddItModal(){ document.getElementById('modalAddIt').style.display='flex'; }
+function closeAddItModal(){ document.getElementById('modalAddIt').style.display='none'; }
+function confirmAddIt(){
+  const f=document.getElementById('miFecha').value||'';
+  const h=document.getElementById('miHora').value||'';
+  const l=document.getElementById('miLugar').value||'';
+  const a=document.getElementById('miAct').value||'';
+  const e=num(document.getElementById('miEur').value);
+  state.itinerario.push([f,h,l,a,e]);
+  saveState(); closeAddItModal(); render();
+}
+
 // ---------- Presupuesto Detallado ----------
-function addRow(){ state.detalle.push({cat:"Nueva categoría", det:"Descripción", eur:0}); saveState(); render(); }
 function delRow(idx){ state.detalle.splice(idx,1); saveState(); render(); }
 function onEditRow(idx, field, value){
   if(field==='eur') state.detalle[idx].eur = num(value);
+  else if(field==='cat') state.detalle[idx].cat = value;
   else state.detalle[idx][field] = value;
-  saveState(); renderTotals(); renderCharts(); fillCatFilter();
+  saveState(); renderTotals(); renderCharts();
 }
 
 // ---------- Itinerario ----------
-function addItRow(){ state.itinerario.push(["", "", "", 0]); saveState(); render(); }
 function delItRow(i){ state.itinerario.splice(i,1); saveState(); render(); }
 function onEditIt(i, j, value){
-  if(j===3) state.itinerario[i][j] = num(value); else state.itinerario[i][j] = value;
-  saveState(); renderItTotals();
+  if(j===4) state.itinerario[i][j] = num(value); else state.itinerario[i][j] = value;
+  saveState(); renderItTotals(); buildCalendar();
 }
 
 // ---------- Filtros ----------
-function applyFilter(){ renderTables(); renderCharts(); }
-function toggleCompact(){
-  const on = document.getElementById('compactToggle').checked;
-  document.getElementById('tbody-detalle').classList.toggle('ellipsis', on);
-  document.getElementById('tbody-it').classList.toggle('ellipsis', on);
-  document.getElementById('card-presupuesto').classList.toggle('compact', on);
-}
+function applyFilter(){ renderTables(); renderCharts(); buildCalendar(); }
 
-// ---------- Utilidades ----------
-function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
-function fmtEUR(n){return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0)}
-function fmtCOP(n){return new Intl.NumberFormat('es-CO').format(Math.round(n||0)) + ' COP'}
-
-// ---------- Render ----------
+// ---------- Render tablas ----------
 function render(){
-  try{
-    // Initialize theme toggle
-    const pref = document.documentElement.getAttribute('data-theme');
-    document.getElementById('themeToggle').checked = (pref==='light');
-    document.getElementById('themeToggle').onclick = themeToggle;
-
-    document.getElementById('fx').value = state.fx.toFixed(2);
-    fillCatFilter();
-    renderTables();
-    renderTotals();
-    renderItTotals();
-    renderCharts();
-  } catch(err){
-    setStatus('err', 'Render error: '+err.message);
-  }
+  document.getElementById('fx').value = state.fx.toFixed(2);
+  fillCatFilter();
+  renderTables();
+  renderTotals();
+  renderItTotals();
+  renderCharts();
+  buildCalendar();
 }
 
 function fillCatFilter(){
   const sel = document.getElementById('filterCat');
   const keep = sel.value;
-  const cats = [...new Set(state.detalle.map(r=>r.cat||'Otros'))].sort();
-  sel.innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const cats = [...new Set(state.detalle.map(r=>r.cat||'OTROS'))].sort();
+  sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>{
+    const def = CATEGORY_DEFS[c]||{icon:'🧾',label:c};
+    return `<option value="${c}">${def.icon} ${def.label}</option>`;
+  }).join('');
   sel.value = keep || '';
 }
 
@@ -310,15 +381,20 @@ function renderTables(){
   const tb = document.getElementById('tbody-detalle');
   tb.innerHTML = '';
   state.detalle
-    .filter(r => (!cat || r.cat===cat) && (!txt || (r.cat+" "+r.det).toLowerCase().includes(txt)))
+    .filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt)))
     .forEach((r,idx)=>{
       const tr = document.createElement('tr');
+      const def = CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
       tr.innerHTML = `
-        <td title="${r.cat}"><input type="text" value="${r.cat}" oninput="onEditRow(${idx},'cat',this.value)"/></td>
+        <td title="${def.label}">
+          <select onchange="onEditRow(${idx},'cat',this.value)">
+            ${Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}" ${k===r.cat?'selected':''}>${v.icon} ${v.abbr}</option>`).join('')}
+          </select>
+        </td>
         <td title="${r.det}"><input type="text" value="${r.det}" oninput="onEditRow(${idx},'det',this.value)"/></td>
-        <td class="right"><input type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
+        <td class="right eur-col"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
         <td class="right">${fmtCOP(r.eur*state.fx)}</td>
-        <td class="right"><button onclick="delRow(${idx})">Eliminar</button></td>`;
+        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
       tb.appendChild(tr);
     });
 
@@ -327,16 +403,17 @@ function renderTables(){
   const tbi = document.getElementById('tbody-it');
   tbi.innerHTML='';
   state.itinerario
-    .filter(it => (!ft || (it[1]+" "+it[2]).toLowerCase().includes(ft)))
+    .filter(it => (!ft || (it[1]+" "+it[2]+" "+it[3]).toLowerCase().includes(ft)))
     .forEach((it, i)=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td title="${it[0]}"><input type="text" value="${it[0]}" oninput="onEditIt(${i},0,this.value)"/></td>
         <td title="${it[1]}"><input type="text" value="${it[1]}" oninput="onEditIt(${i},1,this.value)"/></td>
         <td title="${it[2]}"><input type="text" value="${it[2]}" oninput="onEditIt(${i},2,this.value)"/></td>
-        <td class="right"><input type="number" step="0.01" value="${it[3]}" oninput="onEditIt(${i},3,this.value)"/></td>
-        <td class="right">${fmtCOP(it[3]*state.fx)}</td>
-        <td class="right"><button onclick="delItRow(${i})">Eliminar</button></td>`;
+        <td title="${it[3]}"><input type="text" value="${it[3]}" oninput="onEditIt(${i},3,this.value)"/></td>
+        <td class="right eur-col"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
+        <td class="right">${fmtCOP(it[4]*state.fx)}</td>
+        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
       tbi.appendChild(tr);
     });
 }
@@ -348,7 +425,7 @@ function renderTotals(){
   document.getElementById('total-cop').textContent = fmtCOP(totalC);
 }
 function renderItTotals(){
-  const tE = state.itinerario.reduce((a,b)=>a+(+b[3]||0),0);
+  const tE = state.itinerario.reduce((a,b)=>a+(+b[4]||0),0);
   const tC = tE * state.fx;
   document.getElementById('tot-it-eur').textContent = fmtEUR(tE);
   document.getElementById('tot-it-cop').textContent = fmtCOP(tC);
@@ -358,22 +435,20 @@ function renderItTotals(){
 let barChart, pieChart;
 function groupByCategory(){
   const map = new Map();
-  // mismo filtro que la tabla
   const txt = (document.getElementById('filterText').value||'').toLowerCase();
   const cat = document.getElementById('filterCat').value||'';
   state.detalle
-    .filter(r => (!cat || r.cat===cat) && (!txt || (r.cat+" "+r.det).toLowerCase().includes(txt)))
-    .forEach(r=>{
-      const k = r.cat||'Otros';
-      map.set(k, (map.get(k)||0) + (+r.eur||0));
-    });
-  return {labels:[...map.keys()], values:[...map.values()]};
+    .filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt)))
+    .forEach(r=>{ map.set(r.cat, (map.get(r.cat)||0) + (+r.eur||0)); });
+  const labels = [...map.keys()].map(k=>clabel(k));
+  const values = [...map.values()];
+  return {labels, values};
 }
 function renderCharts(){
   const {labels, values} = groupByCategory();
   const ctx1 = document.getElementById('barChart');
   const ctx2 = document.getElementById('pieChart');
-  const colors = ['#34d399','#60a5fa','#fbbf24','#f472b6','#a78bfa','#22d3ee','#f59e0b','#10b981','#ef4444','#93c5fd'];
+  const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981'];
 
   if(barChart) barChart.destroy();
   barChart = new Chart(ctx1, {
@@ -381,14 +456,8 @@ function renderCharts(){
     data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]},
     options:{
       responsive:true,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label: (c)=>`€ ${c.parsed.y.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}`}},
-      },
-      scales:{
-        y:{beginAtZero:true, ticks:{color:'var(--text-soft)'}, grid:{color:'var(--border)'}},
-        x:{ticks:{color:'var(--text-soft)'}, grid:{display:false}}
-      }
+      plugins:{legend:{display:false},tooltip:{callbacks:{label: (c)=>`€ ${c.parsed.y.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}`}}},
+      scales:{y:{beginAtZero:true},x:{}}
     }
   });
 
@@ -400,82 +469,41 @@ function renderCharts(){
   });
 }
 
-// ---------- Export / Import ----------
-function exportJSON(){
-  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'colombia-plan.json';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-}
-function toCSV(rows){
-  const header = ['Categoría','Detalle','Euros','COP'];
-  const fx = state.fx;
-  const esc = (s)=>String(s).replace(/"/g,'""');
-  const data = rows.map(r=>[r.cat, r.det, r.eur, Math.round(r.eur*fx)]);
-  return [header, ...data]
-    .map(r=>r.map(x=>`"${esc(x)}"`).join(','))
-    .join('\n');
-}
-function downloadCSV(filename, content){
-  const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-}
-
-document.getElementById('importFile').addEventListener('change', (e)=>{
-  const f = e.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{ state = JSON.parse(reader.result); saveState(); render(); setStatus('ok','Importado correctamente'); }
-    catch(err){ alert('Archivo inválido'); setStatus('err','Import falló: '+err.message); }
-  };
-  reader.readAsText(f);
-});
-
-function resetData(){
-  if(confirm('¿Restablecer al ejemplo inicial?')){
-    state = JSON.parse(JSON.stringify(SAMPLE));
-    saveState(); render(); setStatus('warn','Restablecido al ejemplo');
+// ---------- Calendario simple (por día/hora) ----------
+function buildCalendar(){
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML='';
+  // Agrupar por fecha
+  const byDate = {};
+  for(const it of state.itinerario){
+    const [fecha,hora,lugar,act,costo] = it;
+    const key = fecha||'Sin fecha';
+    if(!byDate[key]) byDate[key]=[];
+    byDate[key].push({hora:hora||'', lugar, act, costo});
   }
-}
-
-// ---------- Self-tests (pruebas rápidas) ----------
-function setStatus(kind, msg){
-  const el = document.getElementById('testStatus');
-  if(!el) return;
-  el.textContent = msg;
-}
-function runSelfTests(){
-  try{
-    // Test 1: funciones presentes
-    if(typeof exportJSON !== 'function') throw new Error('exportJSON no está definida');
-    if(typeof toCSV !== 'function') throw new Error('toCSV no está definida');
-
-    // Test 2: CSV tiene salto de línea correcto y encabezado
-    const csv = toCSV([{cat:'X',det:'Y',eur:1}]);
-    if(!csv.includes('\n')) throw new Error('CSV no contiene saltos de línea \\n');
-    if(!csv.startsWith('"Categoría","Detalle","Euros","COP"')) throw new Error('CSV sin encabezado');
-
-    // Test 3: Agrupación por categoría coherente
-    const g = groupByCategory();
-    if(!Array.isArray(g.labels) || !Array.isArray(g.values)) throw new Error('groupByCategory mal formado');
-
-    setStatus('ok','Tests OK');
-  } catch(err){
-    setStatus('err','Tests fallaron: '+err.message);
-    console.error(err);
+  // Ordenar fechas (dd/mm/aaaa)
+  const keys = Object.keys(byDate).sort((a,b)=>{
+    const pa=a.split('/').reverse().join('-');
+    const pb=b.split('/').reverse().join('-');
+    return pa.localeCompare(pb);
+  });
+  for(const k of keys){
+    const col = document.createElement('div');
+    col.className='day-col';
+    col.innerHTML = `<div class="day-header">${k}</div>`;
+    const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||''));
+    for(const it of items){
+      const el = document.createElement('div');
+      el.className='slot';
+      el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${it.lugar} · ${it.act}</div>`;
+      col.appendChild(el);
+    }
+    grid.appendChild(col);
   }
 }
 
 // ---------- Init ----------
 render();
-runSelfTests();
 </script>
 </body>
 </html>
