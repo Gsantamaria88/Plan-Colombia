@@ -360,12 +360,10 @@ const SAMPLE = {
 
 let state = loadState();
 function loadState(){
-  try{
-    const raw = localStorage.getItem('colombia-plan');
-    if(!raw) return normalize(JSON.parse(JSON.stringify(SAMPLE)));
-    const obj = JSON.parse(raw);
-    return normalize(obj);
-  }catch(e){
+  // Para volver a un estado 100% funcional: siempre arrancamos con SAMPLE
+  // (ignoramos localStorage por ahora). Luego podemos reactivar persistencia.
+  return JSON.parse(JSON.stringify(SAMPLE));
+}catch(e){
     return normalize(JSON.parse(JSON.stringify(SAMPLE)));
   }
 }
@@ -493,7 +491,22 @@ function renderItTotals(){ const tE = state.itinerario.reduce((a,b)=>a+(+b[4]||0
 
 // ---------- Gráficos ----------
 let barChart, pieChart;
-function groupByCategory(){ const map = new Map(); const txt = (document.getElementById('filterText').value||'').toLowerCase(); const cat = document.getElementById('filterCat').value||''; state.detalle.filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt))).forEach(r=>{ map.set(r.cat, (map.get(r.cat)||0) + (+r.eur||0)); }); const labels = [...map.keys()].map(k=>{ const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k}; return `${d.icon} ${d.abbr}`; }); const values = [...map.values()]; return {labels, values}; }
+function groupByCategory(){
+  // Agrupa por categoría pero respeta el ORDEN NARRATIVO actual
+  const txt = (document.getElementById('filterText').value||'').toLowerCase();
+  const catFilter = document.getElementById('filterCat').value||'';
+  const rows = state.detalle.filter(r => (!catFilter || r.cat===catFilter) && (!txt || (r.det||'').toLowerCase().includes(txt)));
+  const sum = new Map();
+  const orderMap = new Map();
+  rows.forEach((r,idx)=>{
+    sum.set(r.cat, (sum.get(r.cat)||0) + (+r.eur||0));
+    if(!orderMap.has(r.cat)) orderMap.set(r.cat, idx); // primer índice donde aparece esa cat en el orden narrativo
+  });
+  const cats = [...sum.keys()].sort((a,b)=> (orderMap.get(a)||0) - (orderMap.get(b)||0));
+  const labels = cats.map(k=>{ const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k}; return `${d.icon} ${d.abbr}`; });
+  const values = cats.map(k=> sum.get(k));
+  return {labels, values};
+}
 function renderCharts(){ const {labels, values} = groupByCategory(); const ctx1 = document.getElementById('barChart'); const ctx2 = document.getElementById('pieChart'); const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981']; if(barChart) barChart.destroy(); barChart = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{display:false}}} }); if(pieChart) pieChart.destroy(); pieChart = new Chart(ctx2, { type:'pie', data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{position:'bottom'}}} }); }
 
 // ---------- Clima (sin dependencia de red por defecto) ----------
