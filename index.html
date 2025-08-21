@@ -63,8 +63,19 @@
     .note{font-size:12px;color:var(--muted)}
 
     /* Inputs compactos */
-    .eur-input{width:100%;max-width:64px;text-align:right}
+    .eur-input{width:54px;max-width:54px;text-align:right;padding:6px 8px}
+    @media (max-width:600px){.eur-input{width:48px;max-width:48px}}
     .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
+
+    td.cop{white-space:nowrap}
+    @media (max-width:600px){ td.cop{font-size:0.82rem} }
+    @media (max-width:600px){
+      colgroup col.col-cat{width:clamp(72px,18%,110px)}
+      colgroup col.col-det{width:clamp(180px,46%,58ch)}
+      colgroup col.col-eur{width:52px}
+      colgroup col.col-cop{width:clamp(110px,30%,13ch)}
+      colgroup col.col-act{width:36px}
+    }
 
     /* Gráficas */
     canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:12px;padding:6px}
@@ -354,7 +365,18 @@ function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state
 // ---------- Utils ----------
 function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
 function fmtEUR(n){return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0)}
-function fmtCOP(n){return new Intl.NumberFormat('es-CO').format(Math.round(n||0)) + ' COP'}
+function fmtCOP(n){
+  const v = Math.round(n||0);
+  const isMob = (typeof window!=='undefined' && window.innerWidth<=600);
+  if(isMob){
+    if(v>=1000000) return (v/1000000).toFixed(2).replace(/\.?0+$/,'')+'M COP';
+    if(v>=1000) return Math.round(v/1000)+'K COP';
+  }
+  return new Intl.NumberFormat('es-CO').format(v)+' COP';
+}
+if(typeof window!=='undefined'){
+  window.addEventListener('resize', ()=>{ renderTables(); renderTotals(); renderItTotals(); });
+}
 function parseDMY(s){ const [d,m,y]=(s||'').split('/').map(x=>+x); return new Date(y,m-1,d); }
 function formatDMY(dt){ const d=String(dt.getDate()).padStart(2,'0'); const m=String(dt.getMonth()+1).padStart(2,'0'); const y=dt.getFullYear(); return `${d}/${m}/${y}`; }
 function addDays(dt, n){ const d=new Date(dt); d.setDate(d.getDate()+n); return d; }
@@ -427,7 +449,7 @@ function renderTables(){
       </td>
       <td title="${r.det}"><input type="text" value="${abbrText(r.det)}" oninput="onEditRow(${idx},'det',this.value)"/></td>
       <td class="right"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
-      <td class="right">${fmtCOP(r.eur*state.fx)}</td>
+      <td class="right cop">${fmtCOP(r.eur*state.fx)}</td>
       <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
     tb.appendChild(tr);
   });
@@ -442,7 +464,7 @@ function renderTables(){
       <td title="${it[2]}"><input type="text" value="${abbrText(it[2])}" oninput="onEditIt(${i},2,this.value)"/></td>
       <td title="${it[3]}"><input type="text" value="${abbrText(it[3])}" oninput="onEditIt(${i},3,this.value)"/></td>
       <td class="right"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
-      <td class="right">${fmtCOP(it[4]*state.fx)}</td>
+      <td class="right cop">${fmtCOP(it[4]*state.fx)}</td>
       <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
     tbi.appendChild(tr);
   });
@@ -469,8 +491,68 @@ function getWxLocal(dateStr, placeText){ const code = pickCityCode(abbrText(plac
 // ---------- Calendarios ----------
 function switchCal(which){ document.getElementById('tabList').classList.toggle('active', which==='list'); document.getElementById('tabAgenda').classList.toggle('active', which==='agenda'); document.getElementById('calendarList').style.display = which==='list'? 'grid':'none'; document.getElementById('calendarAgenda').style.display = which==='agenda'? 'grid':'none'; }
 function buildCalendars(){ buildListCalendar(); buildAgendaCalendar(); }
-function buildListCalendar(){ const host = document.getElementById('calendarList'); host.innerHTML=''; const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'', lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'00:00', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='day-col'; col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`; const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||'')); for(const it of items){ const el = document.createElement('div'); el.className='slot'; el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el); } host.appendChild(col); } }
-function buildAgendaCalendar(){ const host = document.getElementById('calendarAgenda'); host.innerHTML=''; const HSTART=6, HEND=22, PIX_PER_H=54; function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H; } const byDate = {}; for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'08:00', dur:60, lugar, act}); } (state.stays||[]).forEach(st=>{ const from = parseDMY(st.desde), to = parseDMY(st.hasta); if(!isNaN(from) && !isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){ const key = formatDMY(d); if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:'07:00', dur:90, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true}); } } }); const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); }); for(const k of keys){ const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt); const col = document.createElement('div'); col.className='agenda-day'; col.innerHTML = `<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`; const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—'; const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp); const hours = document.createElement('div'); hours.className='hours'; for(let h=HSTART; h<=HEND; h++){ const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line); const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label); } const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||'')); for(const it of items){ const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H; const block = document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top = top+'px'; block.style.height = hpx+'px'; block.innerHTML = `<div class=\"btime\">${it.hora} · ${abbrText(it.lugar)}</div><div class=\"btitle\">${abbrText(it.act)}</div>`; hours.appendChild(block); } col.appendChild(hours); host.appendChild(col); } }
+function buildListCalendar(){
+  const host = document.getElementById('calendarList'); host.innerHTML='';
+  const byDate = {};
+  for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'', lugar, act}); }
+  (state.stays||[]).forEach(st=>{
+    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
+    if(!isNaN(from) && !isNaN(to)){
+      for(let d=from; d<=to; d=addDays(d,1)){
+        const key = formatDMY(d); if(!byDate[key]) byDate[key]=[];
+        const isStart = d.getTime()===from.getTime();
+        const isEnd = d.getTime()===to.getTime();
+        if(isStart) byDate[key].push({hora:'15:00', lugar: st.lugar, act: 'Check-in'});
+        if(isEnd) byDate[key].push({hora:'11:00', lugar: st.lugar, act: 'Check-out'});
+        if(!isStart && !isEnd){ byDate[key].push({hora:'', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'}); }
+      }
+    }
+  });
+  const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); });
+  for(const k of keys){
+    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
+    const col = document.createElement('div'); col.className='day-col';
+    col.innerHTML = `<div class=\"day-header\"><span>${k}</span><span>${wd}</span></div>`;
+    const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️';
+    const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
+    const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp);
+    const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||''));
+    for(const it of items){ const el = document.createElement('div'); el.className='slot'; el.innerHTML = `<div class=\"time\">${it.hora||'—:—'}</div><div class=\"title\">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el); }
+    host.appendChild(col);
+  }
+} }
+function buildAgendaCalendar(){
+  const host = document.getElementById('calendarAgenda'); host.innerHTML='';
+  const HSTART=6, HEND=22, PIX_PER_H=54; function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H; }
+  const byDate = {};
+  for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'08:00', dur:60, lugar, act}); }
+  (state.stays||[]).forEach(st=>{
+    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
+    if(!isNaN(from) && !isNaN(to)){
+      for(let d=from; d<=to; d=addDays(d,1)){
+        const key = formatDMY(d); if(!byDate[key]) byDate[key]=[];
+        const isStart = d.getTime()===from.getTime(); const isEnd = d.getTime()===to.getTime();
+        if(isStart) byDate[key].push({hora:'15:00', dur:60, lugar: st.lugar, act: 'Check-in', stay:true});
+        if(isEnd) byDate[key].push({hora:'11:00', dur:60, lugar: st.lugar, act: 'Check-out', stay:true});
+        if(!isStart && !isEnd) byDate[key].push({hora:'09:00', dur:120, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true});
+      }
+    }
+  });
+  const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); });
+  for(const k of keys){
+    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
+    const col = document.createElement('div'); col.className='agenda-day';
+    col.innerHTML = `<div class=\"agenda-header\"><span>${k}</span><span>${wd}</span></div>`;
+    const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️';
+    const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
+    const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp);
+    const hours = document.createElement('div'); hours.className='hours';
+    for(let h=HSTART; h<=HEND; h++){ const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line); const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label); }
+    const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
+    for(const it of items){ const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H; const block = document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top = top+'px'; block.style.height = hpx+'px'; block.innerHTML = `<div class=\"btime\">${it.hora} · ${abbrText(it.lugar)}</div><div class=\"btitle\">${abbrText(it.act)}</div>`; hours.appendChild(block); }
+    col.appendChild(hours); host.appendChild(col);
+  }
+} }
 
 // ---------- Sync GitHub ----------
 function openSyncModal(){ document.getElementById('modalSync').style.display='flex'; const repo = localStorage.getItem('ghRepo')||''; const branch = localStorage.getItem('ghBranch')||'main'; const path = localStorage.getItem('ghPath')||'data/plan.json'; document.getElementById('ghRepo').value=repo; document.getElementById('ghBranch').value=branch; document.getElementById('ghPath').value=path; }
@@ -478,16 +560,36 @@ function closeSyncModal(){ document.getElementById('modalSync').style.display='n
 async function saveToGitHub(){ const repo = document.getElementById('ghRepo').value.trim(); const branch = document.getElementById('ghBranch').value.trim(); const path = document.getElementById('ghPath').value.trim(); const token = document.getElementById('ghToken').value.trim(); const msg = document.getElementById('syncMsg'); if(!repo||!branch||!path||!token){ msg.textContent='Completa todos los campos.'; return; } localStorage.setItem('ghRepo',repo); localStorage.setItem('ghBranch',branch); localStorage.setItem('ghPath',path); try{ const content = btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2)))); const headers = { 'Authorization': `token ${token}`, 'Accept':'application/vnd.github+json' }; const getUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`; let sha=null; const getRes = await fetch(getUrl,{headers}); if(getRes.ok){ const j=await getRes.json(); sha=j.sha; } const putUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}`; const body = { message:'update plan.json', content, branch, sha }; const putRes = await fetch(putUrl,{ method:'PUT', headers, body: JSON.stringify(body)}); if(!putRes.ok){ const t=await putRes.text(); throw new Error(t); } msg.textContent='¡Guardado en GitHub!'; } catch(e){ msg.textContent='Error guardando en GitHub: '+e.message; } }
 
 // ---------- Init ----------
+function resetData(){ state = JSON.parse(JSON.stringify(SAMPLE)); saveState(); render(); }
 render();
 // Orden lógico del presupuesto
 function reorderPresupuesto(){
-  const order = ['ROAD_ES','VUE','TRN_BTA','TRN_MDE','RENT','STY_MDE','STY_AXM','TOUR_MDE','TOUR_EJE','EXTRA'];
-  const idx = Object.fromEntries(order.map((k,i)=>[k,i]));
-  state.detalle.sort((a,b)=>{
-    const ia = idx[a.cat] ?? 999, ib = idx[b.cat] ?? 999;
-    if(ia!==ib) return ia-ib;
-    return (a.det||'').localeCompare(b.det||'');
-  });
+  function d2n(dmy){ const [d,m,y]=dmy.split('/').map(x=>+x); return y*10000 + m*100 + d; }
+  function tokens(s){ const t=(abbrText(s||'')+ '').toUpperCase(); const set=new Set(); const keys=['BOG','MDE','AXM','MAD','JMC','LGR','VILLA','LEYVA','SUBA','DORADO','CIRCASIA','SALENTO','FILANDIA']; for(const k of keys){ if(t.includes(k)) set.add(k); } return set; }
+  const anchors=[]; // derivados del itinerario y las estadías
+  for(const it of state.itinerario){ anchors.push({date: it[0], tokens: tokens(it[2]+' '+it[3])}); }
+  for(const st of (state.stays||[])){ anchors.push({date: st.desde, tokens: tokens(st.lugar)}); anchors.push({date: st.hasta, tokens: tokens(st.lugar)}); }
+  function catTokens(cat){ if(cat==='TRN_BTA') return new Set(['BOG','SUBA','DORADO']); if(cat==='TRN_MDE') return new Set(['MDE','JMC']); if(cat==='TRN_AXM') return new Set(['AXM']); if(cat==='STY_MDE') return new Set(['MDE']); if(cat==='STY_AXM') return new Set(['AXM','CIRCASIA']); if(cat==='ROAD_ES') return new Set(['MAD','LGR']); return new Set(); }
+  function score(a,b){ let s=0; a.forEach(t=>{ if(b.has(t)) s++; }); return s; }
+  function inferDate(item){
+    const itoks = tokens(item.det); const ct = catTokens(item.cat); ct.forEach(x=>itoks.add(x));
+    // Estadías a la fecha de inicio correspondiente
+    if(item.cat==='STY_MDE'){ const st=state.stays.find(s=>/MDE|MEDELL/i.test(s.lugar)); if(st) return st.desde; }
+    if(item.cat==='STY_AXM'){ const st=state.stays.find(s=>/CIRCASIA|AXM|ARMENIA/i.test(s.lugar)); if(st) return st.desde; }
+    // ROAD_ES inicial
+    if(item.cat==='ROAD_ES'){ if(/Parking/i.test(item.det) || /Gasolina/i.test(item.det)) return '26/09/2025'; }
+    // Fallback por rutas típicas
+    if(/BOG.*MDE|Jetsmart/i.test(item.det)) return '02/10/2025';
+    if(/MDE.*AXM|Avianca/i.test(item.det)) return '06/10/2025';
+    if(/AXM.*BOG|Wingo/i.test(item.det)) return '11/10/2025';
+    if(/Villa.*Leyva/i.test(item.det)) return '28/09/2025';
+    // Coincidencia con anchors
+    let bestDate='31/12/2099', bestScore=-1;
+    for(const a of anchors){ const s=score(itoks, a.tokens); if(s>bestScore && a.date){ bestScore=s; bestDate=a.date; } else if(s===bestScore && a.date && d2n(a.date)<d2n(bestDate)){ bestDate=a.date; } }
+    return bestDate;
+  }
+  state.detalle.sort((a,b)=>{ const da=d2n(inferDate(a)); const db=d2n(inferDate(b)); if(da!==db) return da-db; return (a.det||'').localeCompare(b.det||''); });
+});
 }
 </script>
 </body>
