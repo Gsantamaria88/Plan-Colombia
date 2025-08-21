@@ -12,73 +12,88 @@
       --bg:#f6f7fb;--card:#ffffff;--muted:#5b6476;--text:#0b1020;--text-soft:#334155;
       --primary:#059669;--accent:#2563eb;--ring:#e2e8f0;--border:#e5e7eb;--chip:#eef2ff;
       --table-row:#f8fafc;--shadow:rgba(2,6,23,.08);
-      /* Anchuras dinámicas */
-      --detail-ch: 48ch; /* se recalcula por JS según el contenido */
-      --cop-ch: 14ch; /* fijo como pediste */
-      --eur-col: 80px; /* columna € estrecha */
-      --cat-col: 160px; /* selector categoría */
+      /* Anchuras controladas */
+      --detail-ch: 65ch; /* pedido: 65 caracteres máximo */
+      --cop-ch: 14ch;   /* pedido: 14 caracteres máximo */
+      --eur-col: 72px;  /* compacta en móvil */
+      --cat-col: 150px; /* selector categoría */
       --action-col: 44px; /* icono eliminar */
+      --container-max: 980px; /* evitar que se vea gigante en PC */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .container{width:100%;max-width:min(1200px, 96vw);margin:24px auto;padding:0 clamp(8px,2vw,16px)}
+    /* Contenedor fluido y centrado, sin huecos laterales raros */
+    .container{width:100%;max-width:var(--container-max);margin-inline:auto;padding-inline:clamp(8px,4vw,16px)}
     .grid{display:grid;gap:16px}
     .cards{grid-template-columns:1fr}
-    @media(min-width:1100px){.cards{grid-template-columns:1fr 1fr}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px var(--shadow)}
-    h1{font-size:clamp(18px,2.2vw,22px);margin:0 0 10px 0}
-    h2{font-size:clamp(15px,1.8vw,18px);margin:0 0 10px 0;color:var(--text-soft)}
+    @media(min-width:1024px){.cards{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 12px 16px;box-shadow:0 10px 30px var(--shadow)}
+    h1{font-size:clamp(18px,2.2vw,22px);margin:8px 0 10px}
+    h2{font-size:clamp(15px,1.8vw,18px);margin:0 0 8px;color:var(--text-soft)}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     label{font-size:12px;color:var(--muted)}
-    input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;outline:none}
+    input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 10px;outline:none}
     input[type="number"]:focus,input[type="text"]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
-    button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;cursor:pointer}
+    button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer}
     button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;color:white;font-weight:700}
     button.warn{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
-    .table-wrap{width:100%;overflow:auto}
-    table{width:100%;border-collapse:separate;border-spacing:0 8px;min-width:720px}
-    th,td{text-align:left;padding:10px 12px}
+
+    /* Tablas 100% responsive sin scroll horizontal en iPhone Safari */
+    .table-wrap{width:100%;overflow-x:auto}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed;min-width:0}
+    colgroup col.col-cat{width:var(--cat-col)}
+    colgroup col.col-det{width:var(--detail-ch)}
+    colgroup col.col-eur{width:var(--eur-col)}
+    colgroup col.col-cop{width:var(--cop-ch)}
+    colgroup col.col-act{width:var(--action-col)}
+    th,td{text-align:left;padding:8px 10px;vertical-align:middle}
     thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
     tbody tr{background:var(--table-row);border:1px solid var(--border)}
     tfoot td{border-top:1px solid var(--border);color:var(--text-soft);font-weight:700}
     .right{text-align:right}
     .note{font-size:12px;color:var(--muted)}
-    canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:16px;padding:8px}
-    .section-title{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
 
-    /* Columnas compactas */
-    .col-cat{width:var(--cat-col)}
-    .col-det{max-width:var(--detail-ch)}
-    .col-eur{width:var(--eur-col)}
-    .col-cop{width:var(--cop-ch)}
-    .col-act{width:var(--action-col)}
-    .eur-input{width:100%;max-width:80px;text-align:right}
+    /* Inputs compactos */
+    .eur-input{width:100%;max-width:64px;text-align:right}
     .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
 
-    /* Modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
-    .modal .box{background:white;color:#0b1020;border:1px solid #e5e7eb;border-radius:16px;max-width:520px;width:100%;padding:16px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
-    .modal .row{gap:8px}
-    .modal .box h3{margin:0 0 8px 0}
-    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    /* Gráficas */
+    canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:12px;padding:6px}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px}
 
     /* Calendario */
     .calendar{overflow:auto}
-    .calendar-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:12px}
-    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:420px}
+    .calendar-tabs{display:flex;gap:8px;margin-bottom:8px}
+    .tab{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer}
+    .tab.active{background:#eef2ff;border-color:#c7d2fe}
+
+    /* Vista Lista */
+    .calendar-list{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:12px}
+    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:360px}
     .day-header{font-weight:700;color:var(--text-soft);margin-bottom:8px;display:flex;justify-content:space-between}
     .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:8px}
     .slot .time{font-size:12px;color:#64748b}
     .slot .title{font-size:14px}
+    .wx{font-size:12px;color:#334155;margin-top:2px}
+
+    /* Vista Agenda (tipo Teams) */
+    .agenda-wrap{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:12px}
+    .agenda-day{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px}
+    .agenda-header{display:flex;justify-content:space-between;color:var(--text-soft);font-weight:700;margin-bottom:6px}
+    .hours{position:relative;height:960px; /* 16 horas * 60px/h */ border-left:1px solid #e5e7eb}
+    .hour-line{position:absolute;left:0;right:0;height:0;border-top:1px dashed #e5e7eb}
+    .hour-label{position:absolute;left:-42px;top:-8px;font-size:11px;color:#64748b}
+    .block{position:absolute;left:8px;right:8px;border-radius:8px;padding:6px 8px;background:#e0f2fe;border:1px solid #bae6fd;overflow:hidden}
+    .block .btime{font-size:12px;color:#1f2937}
+    .block .btitle{font-size:13px}
+    .stay{background:#ecfccb;border-color:#d9f99d}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h1>Plan de Viaje — Colombia · Presupuesto & Itinerario</h1>
-    </div>
+    <h1>Plan de Viaje — Presupuesto & Itinerario</h1>
 
     <div class="grid cards">
       <!-- Card: Gráficos + FX -->
@@ -87,12 +102,12 @@
           <h2>Gráficos (gastos en € por categoría)</h2>
           <div class="row">
             <label for="fx" class="note">Tipo de cambio EUR→COP</label>
-            <input id="fx" type="number" step="0.01" value="4678.18" style="width:140px" />
+            <input id="fx" type="number" step="0.01" value="4678.18" style="width:120px" />
             <button class="primary" onclick="saveFX()">Actualizar</button>
           </div>
         </div>
         <canvas id="barChart"></canvas>
-        <div style="height:12px"></div>
+        <div style="height:8px"></div>
         <canvas id="pieChart"></canvas>
         <p class="note">Los gráficos usan importes en euros. Las tablas muestran € y COP (según el tipo de cambio editable).</p>
       </section>
@@ -110,13 +125,16 @@
         </div>
         <div class="table-wrap">
           <table>
+            <colgroup>
+              <col class="col-cat"><col class="col-det"><col class="col-eur"><col class="col-cop"><col class="col-act">
+            </colgroup>
             <thead>
               <tr>
-                <th class="col-cat">Categoría</th>
-                <th class="col-det">Detalle</th>
-                <th class="right col-eur">€</th>
-                <th class="right col-cop">COP</th>
-                <th class="col-act"></th>
+                <th>Categoría</th>
+                <th>Detalle (máx 65c)</th>
+                <th class="right">€</th>
+                <th class="right">COP</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="tbody-detalle"></tbody>
@@ -144,23 +162,24 @@
         </div>
         <div class="table-wrap">
           <table>
+            <colgroup>
+              <col style="width:110px"><col style="width:70px"><col class="col-cat"><col class="col-det"><col class="col-eur"><col class="col-cop"><col class="col-act">
+            </colgroup>
             <thead>
               <tr>
-                <th style="width:120px">Fecha</th>
-                <th style="width:80px">Hora</th>
-                <th style="width:200px">Lugar</th>
-                <th class="col-det">Actividad</th>
-                <th class="right col-eur">Costo €</th>
-                <th class="right col-cop">Costo COP</th>
-                <th class="col-act"></th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Lugar</th>
+                <th>Actividad</th>
+                <th class="right">Costo €</th>
+                <th class="right">Costo COP</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="tbody-it"></tbody>
             <tfoot>
               <tr>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td></td><td></td><td></td>
                 <td class="right">TOTAL</td>
                 <td class="right" id="tot-it-eur">0</td>
                 <td class="right" id="tot-it-cop">0</td>
@@ -171,18 +190,21 @@
         </div>
       </section>
 
-      <!-- Card: Calendario (vista semanal simple) -->
+      <!-- Card: Calendario -->
       <section class="card">
         <div class="section-title">
-          <h2>Calendario (vista por día y hora)</h2>
-          <div class="row">
+          <h2>Calendario (lista y agenda por hora)</h2>
+          <div class="row calendar-tabs">
+            <button id="tabList" class="tab active" onclick="switchCal('list')">Lista</button>
+            <button id="tabAgenda" class="tab" onclick="switchCal('agenda')">Agenda</button>
             <button onclick="openStayModal()">+ Añadir estadía</button>
           </div>
         </div>
         <div class="calendar">
-          <div id="calendarGrid" class="calendar-grid"></div>
+          <div id="calendarList" class="calendar-list"></div>
+          <div id="calendarAgenda" class="agenda-wrap" style="display:none"></div>
         </div>
-        <p class="note">Los eventos se ordenan por hora dentro de cada día. Puedes añadir estadías (rango de fechas) y se rellenan automáticamente día por día.</p>
+        <p class="note">Cada día muestra min/max estimada y lluvia basada en promedios climáticos. Para pronóstico en tiempo real podemos añadir una integración con Open‑Meteo.</p>
       </section>
 
     </div>
@@ -219,12 +241,24 @@
       <div class="row"><label>Desde</label><input id="stDesde" type="text" placeholder="dd/mm/aaaa" /></div>
       <div class="row"><label>Hasta</label><input id="stHasta" type="text" placeholder="dd/mm/aaaa" /></div>
       <div class="row"><label>Lugar</label><input id="stLugar" type="text" placeholder="Ciudad / alojamiento" /></div>
-      <div class="row"><label>Nota</label><input id="stNota" type="text" placeholder="p.ej. " /></div>
+      <div class="row"><label>Nota</label><input id="stNota" type="text" placeholder="p.ej. 4 noches" /></div>
       <div class="actions"><button onclick="closeStayModal()">Cancelar</button><button class="primary" onclick="confirmStay()">Añadir</button></div>
     </div>
   </div>
 
 <script>
+// ---------- Abreviaturas ----------
+const CITY_ABBR = [
+  [/bogotá/gi,'BOG'], [/medellín/gi,'MDE'], [/armenia/gi,'AXM'], [/madrid/gi,'MAD'],
+  [/aeropuerto/gi,'Apto'], [/jose maria cordoba|josé maría córdoba|jmc/gi,'JMC'],
+  [/el dorado/gi,'El Dorado']
+];
+function abbrText(s){
+  let t = s||''; CITY_ABBR.forEach(([re,rep])=>{ t = t.replace(re,rep); });
+  if(t.length>65) t = t.slice(0,62)+'…';
+  return t;
+}
+
 // ---------- Categorías con iconos/abreviaturas ----------
 const CATEGORY_DEFS = {
   VUE:{label:'Vuelos', icon:'✈️', abbr:'VUE'},
@@ -240,7 +274,7 @@ const CATEGORY_DEFS = {
   ROAD_ES:{label:'Roadtrip España', icon:'🚙', abbr:'ROAD-ES'}
 };
 
-// ---------- Estado inicial (incluye tus datos) ----------
+// ---------- Estado inicial (con tus datos) ----------
 const SAMPLE = {
   fx: 4678.18,
   detalle: [
@@ -284,8 +318,7 @@ const SAMPLE = {
     ['17/10/2025','10:00','Madrid (Barajas)','Recoger RAV4 y retorno a Logroño',0],
   ],
   stays: [
-    // Puedes añadir más con el modal
-    {desde:'02/10/2025', hasta:'06/10/2025', lugar:'Medellín · Apartamento', nota:'4 noches'},
+    {desde:'02/10/2025', hasta:'06/10/2025', lugar:'Medellín · Apto', nota:'4 noches'},
     {desde:'06/10/2025', hasta:'11/10/2025', lugar:'Circasia · Casa', nota:'5 noches'}
   ]
 };
@@ -298,17 +331,14 @@ function loadState(){
 }
 function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
 
-// ---------- Utilidades ----------
+// ---------- Utils ----------
 function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
 function fmtEUR(n){return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0)}
 function fmtCOP(n){return new Intl.NumberFormat('es-CO').format(Math.round(n||0)) + ' COP'}
 function parseDMY(s){ const [d,m,y]=(s||'').split('/').map(x=>+x); return new Date(y,m-1,d); }
 function formatDMY(dt){ const d=String(dt.getDate()).padStart(2,'0'); const m=String(dt.getMonth()+1).padStart(2,'0'); const y=dt.getFullYear(); return `${d}/${m}/${y}`; }
 function addDays(dt, n){ const d=new Date(dt); d.setDate(d.getDate()+n); return d; }
-function weekdayShortEs(date){
-  const s = new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(date); // ej. "jue."
-  return s.replace('.', '').slice(0,3).toUpperCase(); // JUE
-}
+function weekdayShortEs(date){ const s=new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(date); return s.replace('.', '').slice(0,3).toUpperCase(); }
 
 // ---------- FX ----------
 function saveFX(){
@@ -355,7 +385,7 @@ function confirmStay(){
   const h=document.getElementById('stHasta').value||'';
   const l=document.getElementById('stLugar').value||'';
   const n=document.getElementById('stNota').value||'';
-  if(d && h && l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendar(); }
+  if(d && h && l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendars(); }
   closeStayModal();
 }
 
@@ -365,20 +395,20 @@ function onEditRow(idx, field, value){
   if(field==='eur') state.detalle[idx].eur = num(value);
   else if(field==='cat') state.detalle[idx].cat = value;
   else state.detalle[idx][field] = value;
-  saveState(); renderTotals(); renderCharts(); autosizeDetailColumn();
+  saveState(); renderTotals(); renderCharts();
 }
 
 // ---------- Itinerario ----------
 function delItRow(i){ state.itinerario.splice(i,1); saveState(); render(); }
 function onEditIt(i, j, value){
   if(j===4) state.itinerario[i][j] = num(value); else state.itinerario[i][j] = value;
-  saveState(); renderItTotals(); buildCalendar();
+  saveState(); renderItTotals(); buildCalendars();
 }
 
 // ---------- Filtros ----------
-function applyFilter(){ renderTables(); renderCharts(); buildCalendar(); }
+function applyFilter(){ renderTables(); renderCharts(); buildCalendars(); }
 
-// ---------- Render tablas ----------
+// ---------- Render maestro ----------
 function render(){
   document.getElementById('fx').value = state.fx.toFixed(2);
   fillCatFilter();
@@ -386,8 +416,7 @@ function render(){
   renderTotals();
   renderItTotals();
   renderCharts();
-  buildCalendar();
-  autosizeDetailColumn();
+  buildCalendars();
 }
 
 function fillCatFilter(){
@@ -414,15 +443,19 @@ function renderTables(){
       const tr = document.createElement('tr');
       const def = CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
       tr.innerHTML = `
-        <td class="col-cat" title="${def.label}">
+        <td title="${def.label}">
           <select onchange="onEditRow(${idx},'cat',this.value)">
             ${Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}" ${k===r.cat?'selected':''}>${v.icon} ${v.abbr}</option>`).join('')}
           </select>
         </td>
-        <td class="col-det" title="${r.det}"><input type="text" value="${r.det}" oninput="onEditRow(${idx},'det',this.value)"/></td>
-        <td class="right col-eur"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
-        <td class="right col-cop">${fmtCOP(r.eur*state.fx)}</td>
-        <td class="right col-act"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
+        <td title="${r.det}"><input type="text" value="${r.det}" oninput="onEditRow(${idx},'det',this.value)"/></td>
+        <td class="right"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
+        <td class="right">${fmtCOP(r.eur*state.fx)}</td>
+        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
+      // aplicar abreviatura visual al detalle sin tocar el valor real
+      const detInput = tr.querySelector('td:nth-child(2) input');
+      detInput.addEventListener('blur', ()=>{ detInput.value = detInput.value; });
+      detInput.value = abbrText(detInput.value);
       tb.appendChild(tr);
     });
 
@@ -437,11 +470,11 @@ function renderTables(){
       tr.innerHTML = `
         <td title="${it[0]}"><input type="text" value="${it[0]}" oninput="onEditIt(${i},0,this.value)"/></td>
         <td title="${it[1]}"><input type="text" value="${it[1]}" oninput="onEditIt(${i},1,this.value)"/></td>
-        <td class="col-cat" title="${it[2]}"><input type="text" value="${it[2]}" oninput="onEditIt(${i},2,this.value)"/></td>
-        <td class="col-det" title="${it[3]}"><input type="text" value="${it[3]}" oninput="onEditIt(${i},3,this.value)"/></td>
-        <td class="right col-eur"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
-        <td class="right col-cop">${fmtCOP(it[4]*state.fx)}</td>
-        <td class="right col-act"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
+        <td title="${it[2]}"><input type="text" value="${abbrText(it[2])}" oninput="onEditIt(${i},2,this.value)"/></td>
+        <td title="${it[3]}"><input type="text" value="${abbrText(it[3])}" oninput="onEditIt(${i},3,this.value)"/></td>
+        <td class="right"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
+        <td class="right">${fmtCOP(it[4]*state.fx)}</td>
+        <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
       tbi.appendChild(tr);
     });
 }
@@ -482,33 +515,82 @@ function renderCharts(){
   const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981'];
 
   if(barChart) barChart.destroy();
-  barChart = new Chart(ctx1, {
-    type:'bar',
-    data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]},
-    options:{responsive:true, plugins:{legend:{display:false}}}
-  });
+  barChart = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{display:false}}} });
 
   if(pieChart) pieChart.destroy();
-  pieChart = new Chart(ctx2, {
-    type:'pie',
-    data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]},
-    options:{responsive:true, plugins:{legend:{position:'bottom'}}}
-  });
+  pieChart = new Chart(ctx2, { type:'pie', data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{position:'bottom'}}} });
 }
 
-// ---------- Calendario (con iniciales del día + estadías) ----------
-function buildCalendar(){
-  const grid = document.getElementById('calendarGrid');
-  grid.innerHTML='';
+// ---------- Clima (promedio mensual) ----------
+const CITY_COORD = {
+  'BOG': {lat:4.701, lon:-74.146},
+  'MDE': {lat:6.219, lon:-75.590},
+  'AXM': {lat:4.453, lon:-75.766},
+  'MAD': {lat:40.471, lon:-3.562},
+};
+let climateCache = {}; // {key: {month:"09": {tmin,tmax,pp}}}
+
+async function loadClimate(code){
+  if(climateCache[code]) return climateCache[code];
+  const {lat,lon} = CITY_COORD[code]||{}; if(!lat) return {};
+  // Open‑Meteo Climate API (promedios mensuales)
+  const url = `https://climate-api.open-meteo.com/v1/climate?latitude=${lat}&longitude=${lon}&start_month=01&end_month=12&daily=temperature_2m_max_mean,temperature_2m_min_mean,precipitation_sum_mean`;
+  try{
+    const res = await fetch(url); const j = await res.json();
+    const out = {};
+    (j?.daily?.time||[]).forEach((d, i)=>{
+      const m = d.split('-')[1];
+      out[m] = {
+        tmin: j.daily.temperature_2m_min_mean?.[i] ?? null,
+        tmax: j.daily.temperature_2m_max_mean?.[i] ?? null,
+        pp: j.daily.precipitation_sum_mean?.[i] ?? null
+      };
+    });
+    climateCache[code]=out; return out;
+  }catch(e){ return {}; }
+}
+
+function pickCityCode(text){
+  const t=(text||'').toUpperCase();
+  if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE';
+  if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM';
+  if(t.includes('BOG')||t.includes('SUBA')) return 'BOG';
+  if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('MADRID')) return 'MAD';
+  return 'MDE';
+}
+
+async function getWxFor(dateStr, placeText){
+  const code = pickCityCode(abbrText(placeText||''));
+  const month = (dateStr||'01/01/2000').split('/')[1];
+  const climate = await loadClimate(code);
+  const m = climate[month]||{};
+  const rainy = (m.pp||0) > 2; // umbral simple
+  return { code, tmin: m.tmin, tmax: m.tmax, rainy };
+}
+
+// ---------- Calendarios (Lista y Agenda) ----------
+function switchCal(which){
+  document.getElementById('tabList').classList.toggle('active', which==='list');
+  document.getElementById('tabAgenda').classList.toggle('active', which==='agenda');
+  document.getElementById('calendarList').style.display = which==='list'? 'grid':'none';
+  document.getElementById('calendarAgenda').style.display = which==='agenda'? 'grid':'none';
+}
+
+async function buildCalendars(){
+  buildListCalendar();
+  await buildAgendaCalendar();
+}
+
+async function buildListCalendar(){
+  const host = document.getElementById('calendarList');
+  host.innerHTML='';
   const byDate = {};
-  // eventos del itinerario
   for(const it of state.itinerario){
     const [fecha,hora,lugar,act] = it;
     const key = fecha||'Sin fecha';
     if(!byDate[key]) byDate[key]=[];
     byDate[key].push({hora:hora||'', lugar, act});
   }
-  // expandir estadías día por día
   (state.stays||[]).forEach(st=>{
     const from = parseDMY(st.desde), to = parseDMY(st.hasta);
     if(!isNaN(from) && !isNaN(to)){
@@ -519,36 +601,96 @@ function buildCalendar(){
       }
     }
   });
-  // ordenar y pintar
   const keys = Object.keys(byDate).sort((a,b)=>{
-    const pa=a.split('/').reverse().join('-');
-    const pb=b.split('/').reverse().join('-');
+    const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-');
     return pa.localeCompare(pb);
   });
   for(const k of keys){
-    const dt = parseDMY(k);
-    const wd = isNaN(dt)?'':weekdayShortEs(dt); // iniciales del día en español
+    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
     const col = document.createElement('div');
     col.className='day-col';
     col.innerHTML = `<div class="day-header"><span>${k}</span><span>${wd}</span></div>`;
+    // clima
+    const wx = await getWxFor(k, byDate[k][0]?.lugar||'');
+    const wxp = document.createElement('div');
+    const rain = wx.rainy? '🌧️':'☀️';
+    const tmin = wx.tmin!=null? Math.round(wx.tmin): '—';
+    const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
+    wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`;
+    col.appendChild(wxp);
+
     const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||''));
     for(const it of items){
       const el = document.createElement('div');
       el.className='slot';
-      el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${it.lugar} · ${it.act}</div>`;
+      el.innerHTML = `<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`;
       col.appendChild(el);
     }
-    grid.appendChild(col);
+    host.appendChild(col);
   }
 }
 
-// ---------- Auto-ajuste de la columna Detalle (en ch) ----------
-function autosizeDetailColumn(){
-  const arr = state.detalle.map(r=> (r.det||'').length);
-  const max = Math.max(20, ...arr); // mínimo 20ch
-  const capped = Math.min(max, 60); // tope 60ch para no romper móvil
-  document.documentElement.style.setProperty('--detail-ch', capped+'ch');
+async function buildAgendaCalendar(){
+  const host = document.getElementById('calendarAgenda');
+  host.innerHTML='';
+  const HSTART=6, HEND=22, PIX_PER_H=60; // escala
+  function yFrom(hm){
+    if(!hm||hm==='—') return 0;
+    const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H;
+  }
+
+  const byDate = {};
+  for(const it of state.itinerario){
+    const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha';
+    if(!byDate[key]) byDate[key]=[];
+    byDate[key].push({hora:hora||'08:00', dur:60, lugar, act});
+  }
+  (state.stays||[]).forEach(st=>{
+    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
+    if(!isNaN(from) && !isNaN(to)){
+      for(let d=from; d<=to; d=addDays(d,1)){
+        const key = formatDMY(d);
+        if(!byDate[key]) byDate[key]=[];
+        byDate[key].push({hora:'07:00', dur:90, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true});
+      }
+    }
+  });
+  const keys = Object.keys(byDate).sort((a,b)=>{
+    const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-');
+    return pa.localeCompare(pb);
+  });
+  for(const k of keys){
+    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
+    const col = document.createElement('div'); col.className='agenda-day';
+    col.innerHTML = `<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`;
+    // clima
+    const wx = await getWxFor(k, byDate[k][0]?.lugar||'');
+    const wxp = document.createElement('div'); wxp.className='wx';
+    const rain = wx.rainy? '🌧️':'☀️'; const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
+    wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`;
+    col.appendChild(wxp);
+
+    const hours = document.createElement('div'); hours.className='hours';
+    for(let h=HSTART; h<=HEND; h++){
+      const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line);
+      const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label);
+    }
+    // bloques
+    const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
+    for(const it of items){
+      const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H;
+      const block = document.createElement('div'); block.className='block'+(it.stay?' stay':'');
+      block.style.top = top+'px'; block.style.height = hpx+'px';
+      block.innerHTML = `<div class="btime">${it.hora} · ${abbrText(it.lugar)}</div><div class="btitle">${abbrText(it.act)}</div>`;
+      hours.appendChild(block);
+    }
+    col.appendChild(hours);
+    host.appendChild(col);
+  }
 }
+
+// ---------- Tabs calendario ----------
+function switchCalInit(){ switchCal('list'); }
 
 // ---------- Init ----------
 render();
