@@ -22,7 +22,7 @@
 
     .table-wrap{width:100%;overflow-x:auto}
     table{width:100%;border-collapse:separate;border-spacing:0 6px;table-layout:fixed}
-    col.col-cat{width:90px} col.col-det{width:clamp(180px,50%,65ch)} col.col-eur{width:64px} col.col-cop{width:13ch} col.col-act{width:36px}
+    col.col-cat{width:90px} col.col-det{width:clamp(180px,50%,65ch)} col.col-eur{width:64px} col.col-cop{width:11ch} col.col-act{width:36px}
     thead th{font-size:12px;color:#5b6476;border-bottom:1px solid #e5e7eb;text-align:left;padding:6px}
     tbody tr{background:#f8fafc;border:1px solid #e5e7eb}
     td{padding:6px}
@@ -32,6 +32,30 @@
 
     canvas{width:100% !important;height:auto !important;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:6px}
     .note{font-size:12px;color:#5b6476}
+      /* Calendario */
+    .calendar-tabs{display:flex;gap:8px;margin:8px 0}
+    .tab{padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#fff;cursor:pointer}
+    .tab.active{background:#eef2ff;border-color:#c7d2fe}
+    .calendar{overflow:auto}
+    .calendar-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+    .day-col{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px;min-height:200px}
+    .day-header{font-weight:700;color:#334155;margin-bottom:6px;display:flex;justify-content:space-between}
+    .slot{border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:6px}
+    .slot .time{font-size:12px;color:#64748b}
+    .slot .title{font-size:14px}
+    .wx{font-size:12px;color:#334155;margin-top:2px}
+    /* Agenda */
+    .agenda-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+    .agenda-day{position:relative;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+    .agenda-header{display:flex;justify-content:space-between;color:#334155;font-weight:700;margin-bottom:6px}
+    .hours{position:relative;height:900px;border-left:1px solid #e5e7eb}
+    .hour-line{position:absolute;left:0;right:0;height:0;border-top:1px dashed #e5e7eb}
+    .hour-label{position:absolute;left:-40px;top:-8px;font-size:11px;color:#64748b}
+    .block{position:absolute;left:8px;right:8px;border-radius:8px;padding:6px 8px;background:#e0f2fe;border:1px solid #bae6fd;overflow:hidden}
+    .block .btime{font-size:12px;color:#1f2937}
+    .block .btitle{font-size:13px}
+    .stay{background:#ecfccb;border-color:#d9f99d}
+    @media (max-width:600px){ td.cop{font-size:.82rem} td.right{padding-right:4px} }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -91,6 +115,59 @@
           </table>
         </div>
       </section>
+
+      <!-- Calendario (Lista / Agenda + clima promedio) -->
+      <section class="card">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h2>Calendario (lista y agenda por hora)</h2>
+          <div class="calendar-tabs">
+            <button id="tabList" class="tab active" onclick="switchCal('list')">Lista</button>
+            <button id="tabAgenda" class="tab" onclick="switchCal('agenda')">Agenda</button>
+            <button onclick="openStayModal()">+ Añadir estadía</button>
+          </div>
+        </div>
+        <div class="calendar">
+          <div id="calendarList" class="calendar-list"></div>
+          <div id="calendarAgenda" class="agenda-wrap" style="display:none"></div>
+        </div>
+        <p class="note">Clima: promedio mensual sin llamadas externas.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal presupuesto -->
+  <div id="modalAdd" class="modal" style="display:none;position:fixed;inset:0;place-items:center;background:rgba(0,0,0,.35);padding:16px;z-index:50">
+    <div class="card" style="max-width:520px;width:100%">
+      <h3>Agregar ítem al presupuesto</h3>
+      <div class="row"><label class="note">Categoría</label><select id="mCat"></select></div>
+      <div class="row"><label class="note">Detalle</label><input id="mDet" type="text" placeholder="Descripción"/></div>
+      <div class="row"><label class="note">Euros (€)</label><input id="mEur" type="number" step="0.01" value="0"/></div>
+      <div class="row" style="justify-content:flex-end;gap:8px"><button onclick="closeAddModal()">Cancelar</button><button class="primary" onclick="confirmAdd()">Añadir</button></div>
+    </div>
+  </div>
+
+  <!-- Modal itinerario -->
+  <div id="modalAddIt" class="modal" style="display:none;position:fixed;inset:0;place-items:center;background:rgba(0,0,0,.35);padding:16px;z-index:50">
+    <div class="card" style="max-width:520px;width:100%">
+      <h3>Agregar día al itinerario</h3>
+      <div class="row"><label class="note">Fecha</label><input id="miFecha" type="text" placeholder="dd/mm/aaaa"/></div>
+      <div class="row"><label class="note">Hora</label><input id="miHora" type="text" placeholder="hh:mm"/></div>
+      <div class="row"><label class="note">Lugar</label><input id="miLugar" type="text" placeholder="Ciudad / trayecto"/></div>
+      <div class="row"><label class="note">Actividad</label><input id="miAct" type="text" placeholder="Descripción"/></div>
+      <div class="row"><label class="note">Costo €</label><input id="miEur" type="number" step="0.01" value="0"/></div>
+      <div class="row" style="justify-content:flex-end;gap:8px"><button onclick="closeAddItModal()">Cancelar</button><button class="primary" onclick="confirmAddIt()">Añadir</button></div>
+    </div>
+  </div>
+
+  <!-- Modal estadía -->
+  <div id="modalStay" class="modal" style="display:none;position:fixed;inset:0;place-items:center;background:rgba(0,0,0,.35);padding:16px;z-index:50">
+    <div class="card" style="max-width:520px;width:100%">
+      <h3>Añadir estadía</h3>
+      <div class="row"><label class="note">Desde</label><input id="stDesde" type="text" placeholder="dd/mm/aaaa"/></div>
+      <div class="row"><label class="note">Hasta</label><input id="stHasta" type="text" placeholder="dd/mm/aaaa"/></div>
+      <div class="row"><label class="note">Lugar</label><input id="stLugar" type="text" placeholder="Ciudad / alojamiento"/></div>
+      <div class="row"><label class="note">Nota</label><input id="stNota" type="text" placeholder="p. ej. 4 noches"/></div>
+      <div class="row" style="justify-content:flex-end;gap:8px"><button onclick="closeStayModal()">Cancelar</button><button class="primary" onclick="confirmStay()">Añadir</button></div>
     </div>
   </div>
 
