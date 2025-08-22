@@ -1,227 +1,301 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Plan de Viaje — Presupuesto & Itinerario</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#f6f7fb;--card:#fff;--text:#0b1020;--muted:#5b6476;--soft:#334155;--border:#e5e7eb;
-    --row:#f8fafc;--shadow:0 8px 24px rgba(2,6,23,.08);--chip:#eef2ff;--accent:#2563eb;
-    --max:1040px;
-    /* columnas */
-    --cat:84px; --detMin:200px; --detMax:60ch; --eur:56px; --cop:14.5ch; --act:42px;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
-  .container{width:min(100%,var(--max));margin:auto;padding:12px}
-  .cards{display:grid;grid-template-columns:1fr;gap:12px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
-  h1{margin:6px 0 10px;font-size:20px}
-  h2{margin:0 0 8px;font-size:18px;color:var(--soft)}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  label{font-size:12px;color:var(--muted)}
-  input,select,button{font:inherit}
-  input[type="text"],input[type="number"],select{background:var(--chip);border:1px solid var(--border);border-radius:10px;padding:8px 10px;min-width:0}
-  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15);outline:none}
-  button{background:#f1f5f9;border:1px solid var(--border);border-radius:10px;padding:8px 12px;cursor:pointer}
-  button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);color:#fff;border:none;font-weight:700}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Plan de Viaje — Presupuesto & Itinerario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f7fb;--card:#ffffff;--muted:#5b6476;--text:#0b1020;--text-soft:#334155;
+      --primary:#059669;--accent:#2563eb;--ring:#e2e8f0;--border:#e5e7eb;--chip:#eef2ff;
+      --table-row:#f8fafc;--shadow:rgba(2,6,23,.08);
+      /* Columnas y límites */
+      --container-max: 1040px; /* centrado y contenido cómodo en desktop */
+      --cat-min: 88px; --cat-max: 140px;
+      --eur-min: 62px; --eur-max: 72px;
+      --cop-min: 120px; --cop-max: 14ch; /* ~14 caracteres */
+      --det-min: 260px; --det-ideal: 50%; --det-max: 65ch; /* pedido: 65c */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:16px;overflow-x:hidden}
+    @media (max-width:600px){body{font-size:17px}}
 
-  /* TABLAS */
-  .table-wrap{width:100%;overflow-x:auto}
-  table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
-  col.cat{width:var(--cat)} col.det{width:clamp(var(--detMin),48%,var(--detMax))}
-  col.eur{width:var(--eur)} col.cop{width:var(--cop)} col.act{width:var(--act)}
-  thead th, td{overflow:hidden;text-overflow:ellipsis}
-  thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;padding:6px 8px}
-  tbody tr{background:var(--row);border:1px solid var(--border)}
-  td{padding:6px 8px;vertical-align:middle}
-  .right{text-align:right}
-  .eur-input{width:56px;max-width:56px;text-align:right}
-  td.cop{white-space:nowrap;font-variant-numeric:tabular-nums}
-  tfoot td{white-space:nowrap}
+    /* Contenedor centrado SIEMPRE (sin huecos laterales) */
+    .container{width:min(100%, var(--container-max));margin-inline:auto;padding-inline:clamp(10px,3vw,16px)}
 
-  /* GRÁFICAS */
-  canvas{width:100% !important;height:auto !important;background:var(--row);border:1px solid var(--border);border-radius:12px;padding:6px}
+    /* 1 sola columna SIEMPRE: evita espacios raros en pantallas grandes */
+    .cards{display:grid;grid-template-columns:1fr;gap:12px}
 
-  /* CALENDARIO */
-  .calendar-tabs{display:flex;gap:8px;margin:8px 0}
-  .tab{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer}
-  .tab.active{background:#eef2ff;border-color:#c7d2fe}
-  .calendar{overflow:auto}
-  .calendar-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
-  .day-col{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px;min-height:200px}
-  .day-header{font-weight:700;color:var(--soft);margin-bottom:6px;display:flex;justify-content:space-between}
-  .slot{border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:6px}
-  .slot .time{font-size:12px;color:#64748b}
-  .slot .title{font-size:14px}
-  .wx{font-size:12px;color:#334155;margin-top:2px}
-  /* Agenda */
-  .agenda-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-  .agenda-day{position:relative;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px}
-  .agenda-header{display:flex;justify-content:space-between;color:#334155;font-weight:700;margin-bottom:6px}
-  .hours{position:relative;height:900px;border-left:1px solid #e5e7eb}
-  .hour-line{position:absolute;left:0;right:0;height:0;border-top:1px dashed #e5e7eb}
-  .hour-label{position:absolute;left:-40px;top:-8px;font-size:11px;color:#64748b}
-  .block{position:absolute;left:8px;right:8px;border-radius:8px;padding:6px 8px;background:#e0f2fe;border:1px solid #bae6fd;overflow:hidden}
-  .block .btime{font-size:12px;color:#1f2937}
-  .block .btitle{font-size:13px}
-  .stay{background:#ecfccb;border-color:#d9f99d}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 10px 14px;box-shadow:0 8px 24px var(--shadow)}
+    h1{font-size:clamp(18px,2.2vw,22px);margin:8px 0 10px}
+    h2{font-size:clamp(15px,1.8vw,18px);margin:0 0 8px;color:var(--text-soft)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    label{font-size:12px;color:var(--muted)}
+    input[type="number"],input[type="text"],select{background:var(--chip);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 10px;outline:none}
+    input[type="number"]:focus,input[type="text"]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+    button{background:#f1f5f9;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 12px;cursor:pointer}
+    button.primary{background:linear-gradient(135deg,#22c55e,#06b6d4);border:none;color:white;font-weight:700}
+    button.warn{background:#fff7ed;border-color:#fed7aa;color:#7c2d12}
 
-  /* MÓVIL */
-  @media (max-width:600px){
-    :root{ --eur:50px; --cop:12.5ch; --cat:80px; }
-    td.cop{font-size:.86rem}
-    .eur-input{width:48px;max-width:48px}
-    thead th, td{padding:5px 6px}
-  }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    /* Tablas: SIN que empujen al body; scroll solo dentro del wrapper si hiciera falta */
+    .table-wrap{width:100%;overflow-x:auto;overscroll-behavior:contain}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
+
+    /* colgroup con CLAMP => asegura % + límites en px/ch y nunca desborda */
+    colgroup col.col-cat{width:clamp(var(--cat-min), 16%, var(--cat-max))}
+    colgroup col.col-det{width:clamp(var(--det-min), var(--det-ideal), var(--det-max))}
+    colgroup col.col-eur{width:clamp(var(--eur-min), 8%, var(--eur-max))}
+    colgroup col.col-cop{width:clamp(var(--cop-min), 22%, var(--cop-max))}
+    colgroup col.col-act{width:40px}
+
+    th,td{text-align:left;padding:8px 10px;vertical-align:middle}
+    thead th{font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
+    tbody tr{background:var(--table-row);border:1px solid var(--border)}
+    tfoot td{border-top:1px solid var(--border);color:var(--text-soft);font-weight:700}
+    .right{text-align:right; font-size:0.92rem}
+    @media (max-width:600px){ .right{font-size:0.85rem} }
+    .eur-input{font-size:0.95rem}
+    .note{font-size:12px;color:var(--muted)}
+
+    /* Inputs compactos */
+    .eur-input{width:54px;max-width:54px;text-align:right;padding:6px 8px}
+    @media (max-width:600px){.eur-input{width:48px;max-width:48px}}
+    .icon-btn{background:transparent;border:none;cursor:pointer;font-size:18px}
+
+    td.cop{white-space:nowrap}
+    @media (max-width:600px){ td.cop{font-size:0.82rem} }
+    @media (max-width:600px){
+      colgroup col.col-cat{width:clamp(72px,18%,110px)}
+      colgroup col.col-det{width:clamp(180px,46%,58ch)}
+      colgroup col.col-eur{width:52px}
+      colgroup col.col-cop{width:clamp(110px,30%,13ch)}
+      colgroup col.col-act{width:36px}
+    }
+
+    /* Gráficas */
+    canvas{width:100% !important;height:auto !important;background:var(--table-row);border:1px solid var(--border);border-radius:12px;padding:6px}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px}
+
+    /* Calendario */
+    .calendar{overflow:auto}
+    .calendar-tabs{display:flex;gap:8px;margin-bottom:8px}
+    .tab{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer}
+    .tab.active{background:#eef2ff;border-color:#c7d2fe}
+
+    .calendar-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+    .day-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:220px}
+    .day-header{font-weight:700;color:var(--text-soft);margin-bottom:6px;display:flex;justify-content:space-between}
+    .slot{position:relative;border-left:2px solid #e5e7eb;margin-left:4px;padding-left:8px;margin-bottom:6px}
+    .slot .time{font-size:12px;color:#64748b}
+    .slot .title{font-size:14px}
+    .wx{font-size:12px;color:#334155;margin-top:2px}
+
+    /* Agenda tipo Teams */
+    .agenda-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+    .agenda-day{position:relative;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px}
+    .agenda-header{display:flex;justify-content:space-between;color:var(--text-soft);font-weight:700;margin-bottom:6px}
+    .hours{position:relative;height:900px;border-left:1px solid #e5e7eb}
+    .hour-line{position:absolute;left:0;right:0;height:0;border-top:1px dashed #e5e7eb}
+    .hour-label{position:absolute;left:-40px;top:-8px;font-size:11px;color:#64748b}
+    .block{position:absolute;left:8px;right:8px;border-radius:8px;padding:6px 8px;background:#e0f2fe;border:1px solid #bae6fd;overflow:hidden}
+    .block .btime{font-size:12px;color:#1f2937}
+    .block .btitle{font-size:13px}
+    .stay{background:#ecfccb;border-color:#d9f99d}
+
+    /* Modales (ocultos por defecto) */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal .box{background:white;color:#0b1020;border:1px solid #e5e7eb;border-radius:16px;max-width:520px;width:100%;padding:16px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+    .modal .row{gap:8px}
+    .modal .box h3{margin:0 0 8px 0}
+    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <h1>Plan de Viaje — Presupuesto & Itinerario</h1>
+  <div class="container">
+    <h1>Plan de Viaje — Presupuesto & Itinerario</h1>
 
-  <div class="cards">
-    <!-- GRÁFICAS -->
-    <section class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Gráficos (gasto en € por categoría)</h2>
-        <div class="row">
-          <label for="fx">Tipo de cambio EUR→COP</label>
-          <input id="fx" type="number" step="0.01" style="width:120px"/>
-          <button class="primary" onclick="saveFX()">Actualizar</button>
+    <div class="cards">
+      <!-- Gráficos + FX -->
+      <section class="card">
+        <div class="section-title">
+          <h2>Gráficos (gastos en € por categoría)</h2>
+          <div class="row">
+            <label for="fx" class="note">Tipo de cambio EUR→COP</label>
+            <input id="fx" type="number" step="0.01" value="4678.18" style="width:120px" />
+            <button class="primary" onclick="saveFX()">Actualizar</button>
+            <button onclick="openSyncModal()">Guardar en GitHub</button>
+          </div>
         </div>
-      </div>
-      <canvas id="barChart"></canvas>
-      <div style="height:8px"></div>
-      <canvas id="pieChart"></canvas>
-      <p style="font-size:12px;color:#5b6476;margin:8px 0 0">Edita € y verás COP/Gráficas actualizarse en vivo.</p>
-    </section>
+        <canvas id="barChart"></canvas>
+        <div style="height:8px"></div>
+        <canvas id="pieChart"></canvas>
+        <p class="note">Los gráficos usan importes en euros. Las tablas muestran € y COP (según el tipo de cambio editable).</p>
+      </section>
 
-    <!-- PRESUPUESTO -->
-    <section class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Presupuesto detallado</h2>
-        <div class="row">
-          <select id="filterCat" onchange="applyFilter()"><option value="">Todas</option></select>
-          <input id="filterText" type="text" placeholder="Filtrar por texto…" oninput="applyFilter()"/>
-          <button class="primary" onclick="openAddModal()">+ Añadir</button>
-          <button onclick="resetData()">Restablecer</button>
+      <!-- Presupuesto Detallado -->
+      <section class="card" id="card-presupuesto">
+        <div class="section-title">
+          <h2>Presupuesto detallado</h2>
+          <div class="row">
+            <select id="filterCat" onchange="applyFilter()"><option value="">Todas</option></select>
+            <input id="filterText" type="text" placeholder="Filtrar por texto…" oninput="applyFilter()" />
+            <button class="primary" onclick="openAddModal()">+ Añadir</button>
+            <button class="warn" onclick="resetData()">Restablecer</button> <button onclick="recoverData()">Cargar demo</button>
+          </div>
         </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <colgroup><col class="cat"><col class="det"><col class="eur"><col class="cop"><col class="act"></colgroup>
-          <thead>
-            <tr><th>Cat</th><th>Detalle</th><th class="right">€</th><th class="right">COP</th><th></th></tr>
-          </thead>
-          <tbody id="tbody-detalle"></tbody>
-          <tfoot>
-            <tr><td></td><td class="right">TOTAL</td><td class="right" id="total-eur">0</td><td class="right" id="total-cop">0</td><td></td></tr>
-          </tfoot>
-        </table>
-      </div>
-    </section>
-
-    <!-- ITINERARIO -->
-    <section class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2>Itinerario (costos por día)</h2>
-        <div class="row">
-          <input id="filterIt" type="text" placeholder="Filtrar por lugar/actividad…" oninput="applyFilter()"/>
-          <button class="primary" onclick="openAddItModal()">+ Añadir día</button>
+        <div class="table-wrap">
+          <table>
+            <colgroup>
+              <col class="col-cat"><col class="col-det"><col class="col-eur"><col class="col-cop"><col class="col-act">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Cat</th>
+                <th>Detalle (máx 65c)</th>
+                <th class="right">€</th>
+                <th class="right">COP</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-detalle"></tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td class="right">TOTAL</td>
+                <td class="right" id="total-eur">0</td>
+                <td class="right" id="total-cop">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <colgroup>
-            <col style="width:110px"><col style="width:70px"><col class="cat"><col class="det"><col class="eur"><col class="cop"><col class="act">
-          </colgroup>
-          <thead>
-            <tr><th>Fecha</th><th>Hora</th><th>Lugar</th><th>Actividad</th><th class="right">Costo €</th><th class="right">Costo COP</th><th></th></tr>
-          </thead>
-          <tbody id="tbody-it"></tbody>
-          <tfoot>
-            <tr><td></td><td></td><td></td><td class="right">TOTAL</td><td class="right" id="tot-it-eur">0</td><td class="right" id="tot-it-cop">0</td><td></td></tr>
-          </tfoot>
-        </table>
-      </div>
-    </section>
+      </section>
 
-    <!-- CALENDARIO -->
-    <section class="card">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <h2>Calendario (lista y agenda por hora)</h2>
-        <div class="calendar-tabs">
-          <button id="tabList" class="tab active" onclick="switchCal('list')">Lista</button>
-          <button id="tabAgenda" class="tab" onclick="switchCal('agenda')">Agenda</button>
-          <button onclick="openStayModal()">+ Añadir estadía</button>
+      <!-- Itinerario -->
+      <section class="card">
+        <div class="section-title">
+          <h2>Itinerario (costos por día)</h2>
+          <div class="row">
+            <input id="filterIt" type="text" placeholder="Filtrar por lugar/actividad…" oninput="applyFilter()" />
+            <button class="primary" onclick="openAddItModal()">+ Añadir día</button>
+          </div>
         </div>
-      </div>
-      <div class="calendar">
-        <div id="calendarList" class="calendar-list"></div>
-        <div id="calendarAgenda" class="agenda-wrap" style="display:none"></div>
-      </div>
-      <p style="font-size:12px;color:#5b6476;margin:8px 0 0">Clima: promedio mensual sin llamadas externas.</p>
-    </section>
-  </div>
-</div>
+        <div class="table-wrap">
+          <table>
+            <colgroup>
+              <col style="width:110px"><col style="width:70px"><col class="col-cat"><col class="col-det"><col class="col-eur"><col class="col-cop"><col class="col-act">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Lugar</th>
+                <th>Actividad</th>
+                <th class="right">Costo €</th>
+                <th class="right">Costo COP</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-it"></tbody>
+            <tfoot>
+              <tr>
+                <td></td><td></td><td></td>
+                <td class="right">TOTAL</td>
+                <td class="right" id="tot-it-eur">0</td>
+                <td class="right" id="tot-it-cop">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
 
-<!-- MODALES -->
-<div id="modalAdd" class="modal" style="display:none;position:fixed;inset:0;place-items:center;background:rgba(0,0,0,.35);padding:16px;z-index:50">
-  <div class="card" style="max-width:520px;width:100%">
-    <h3>Agregar ítem al presupuesto</h3>
-    <div class="row"><label class="note">Categoría</label><select id="mCat"></select></div>
-    <div class="row"><label class="note">Detalle</label><input id="mDet" type="text" placeholder="Descripción"/></div>
-    <div class="row"><label class="note">Euros (€)</label><input id="mEur" type="number" step="0.01" value="0"/></div>
-    <div class="row" style="justify-content:flex-end;gap:8px"><button onclick="closeAddModal()">Cancelar</button><button class="primary" onclick="confirmAdd()">Añadir</button></div>
-  </div>
-</div>
+      <!-- Calendario -->
+      <section class="card">
+        <div class="section-title">
+          <h2>Calendario (lista y agenda por hora)</h2>
+          <div class="row calendar-tabs">
+            <button id="tabList" class="tab active" onclick="switchCal('list')">Lista</button>
+            <button id="tabAgenda" class="tab" onclick="switchCal('agenda')">Agenda</button>
+            <button onclick="openStayModal()">+ Añadir estadía</button>
+          </div>
+        </div>
+        <div class="calendar">
+          <div id="calendarList" class="calendar-list"></div>
+          <div id="calendarAgenda" class="agenda-wrap" style="display:none"></div>
+        </div>
+        <p class="note">Clima: promedio mensual (sin llamadas externas si no son necesarias). Para pronóstico real podemos activarlo cerca de la fecha.</p>
+      </section>
 
-<div id="modalAddIt" class="modal" style="display:none;position:fixed;inset:0;place-items:center;background:rgba(0,0,0,.35);padding:16px;z-index:50">
-  <div class="card" style="max-width:520px;width:100%">
-    <h3>Agregar día al itinerario</h3>
-    <div class="row"><label class="note">Fecha</label><input id="miFecha" type="text" placeholder="dd/mm/aaaa"/></div>
-    <div class="row"><label class="note">Hora</label><input id="miHora" type="text" placeholder="hh:mm"/></div>
-    <div class="row"><label class="note">Lugar</label><input id="miLugar" type="text" placeholder="Ciudad / trayecto"/></div>
-    <div class="row"><label class="note">Actividad</label><input id="miAct" type="text" placeholder="Descripción"/></div>
-    <div class="row"><label class="note">Costo €</label><input id="miEur" type="number" step="0.01" value="0"/></div>
-    <div class="row" style="justify-content:flex-end;gap:8px"><button onclick="closeAddItModal()">Cancelar</button><button class="primary" onclick="confirmAddIt()">Añadir</button></div>
+    </div>
   </div>
-</div>
 
-<div id="modalStay" class="modal" style="display:none;position:fixed;inset:0;place-items:center;background:rgba(0,0,0,.35);padding:16px;z-index:50">
-  <div class="card" style="max-width:520px;width:100%">
-    <h3>Añadir estadía</h3>
-    <div class="row"><label class="note">Desde</label><input id="stDesde" type="text" placeholder="dd/mm/aaaa"/></div>
-    <div class="row"><label class="note">Hasta</label><input id="stHasta" type="text" placeholder="dd/mm/aaaa"/></div>
-    <div class="row"><label class="note">Lugar</label><input id="stLugar" type="text" placeholder="Ciudad / alojamiento"/></div>
-    <div class="row"><label class="note">Nota</label><input id="stNota" type="text" placeholder="p. ej. 4 noches"/></div>
-    <div class="row" style="justify-content:flex-end;gap:8px"><button onclick="closeStayModal()">Cancelar</button><button class="primary" onclick="confirmStay()">Añadir</button></div>
+  <!-- Modal añadir presupuesto -->
+  <div id="modalAdd" class="modal" aria-hidden="true" style="display:none">
+    <div class="box">
+      <h3>Agregar ítem al presupuesto</h3>
+      <div class="row"><label>Categoria</label><select id="mCat"></select></div>
+      <div class="row"><label>Detalle</label><input id="mDet" type="text" placeholder="Descripción" /></div>
+      <div class="row"><label>Euros (€)</label><input id="mEur" type="number" step="0.01" value="0" /></div>
+      <div class="actions"><button onclick="closeAddModal()">Cancelar</button><button class="primary" onclick="confirmAdd()">Añadir</button></div>
+    </div>
   </div>
-</div>
+
+  <!-- Modal añadir itinerario -->
+  <div id="modalAddIt" class="modal" aria-hidden="true" style="display:none">
+    <div class="box">
+      <h3>Agregar día al itinerario</h3>
+      <div class="row"><label>Fecha</label><input id="miFecha" type="text" placeholder="dd/mm/aaaa" /></div>
+      <div class="row"><label>Hora</label><input id="miHora" type="text" placeholder="hh:mm" /></div>
+      <div class="row"><label>Lugar</label><input id="miLugar" type="text" placeholder="Ciudad / trayecto" /></div>
+      <div class="row"><label>Actividad</label><input id="miAct" type="text" placeholder="Descripción" /></div>
+      <div class="row"><label>Costo €</label><input id="miEur" type="number" step="0.01" value="0" /></div>
+      <div class="actions"><button onclick="closeAddItModal()">Cancelar</button><button class="primary" onclick="confirmAddIt()">Añadir</button></div>
+    </div>
+  </div>
+
+  <!-- Modal añadir estadía -->
+  <div id="modalStay" class="modal" aria-hidden="true" style="display:none">
+    <div class="box">
+      <h3>Agregar estadía (rango de fechas)</h3>
+      <div class="row"><label>Desde</label><input id="stDesde" type="text" placeholder="dd/mm/aaaa" /></div>
+      <div class="row"><label>Hasta</label><input id="stHasta" type="text" placeholder="dd/mm/aaaa" /></div>
+      <div class="row"><label>Lugar</label><input id="stLugar" type="text" placeholder="Ciudad / alojamiento" /></div>
+      <div class="row"><label>Nota</label><input id="stNota" type="text" placeholder="p.ej. 4 noches" /></div>
+      <div class="actions"><button onclick="closeStayModal()">Cancelar</button><button class="primary" onclick="confirmStay()">Añadir</button></div>
+    </div>
+  </div>
+
+  <!-- Modal sync GitHub -->
+  <div id="modalSync" class="modal" aria-hidden="true" style="display:none">
+    <div class="box">
+      <h3>Guardar cambios en GitHub</h3>
+      <p class="note">Se guardará el JSON de tu plan en tu repositorio. El PAT queda <b>solo en este navegador</b> (localStorage).</p>
+      <div class="row"><label>Repo (usuario/repo)</label><input id="ghRepo" type="text" placeholder="usuario/plan-colombia"/></div>
+      <div class="row"><label>Branch</label><input id="ghBranch" type="text" value="main"/></div>
+      <div class="row"><label>Ruta del archivo</label><input id="ghPath" type="text" value="data/plan.json"/></div>
+      <div class="row"><label>GitHub PAT (scopes: repo)</label><input id="ghToken" type="password" placeholder="ghp_..."/></div>
+      <div class="actions"><button onclick="closeSyncModal()">Cancelar</button><button class="primary" onclick="saveToGitHub()">Guardar</button></div>
+      <div id="syncMsg" class="note"></div>
+    </div>
+  </div>
 
 <script>
-// ======= Abreviador y utilidades =======
+// ---------- Abreviaturas visuales ----------
 const CITY_ABBR = [
   [/bogotá/gi,'BOG'], [/medellín/gi,'MDE'], [/armenia/gi,'AXM'], [/madrid/gi,'MAD'],
   [/aeropuerto/gi,'Apto'], [/jose maria c[oó]rdoba|jos[eé] mar[ií]a c[oó]rdoba|jmc/gi,'JMC'],
   [/el dorado/gi,'El Dorado'], [/logroño|lgr/gi,'LGR']
 ];
-function abbrText(s){ let t=s||''; CITY_ABBR.forEach(([re,rep])=>{ t=t.replace(re,rep); }); return t.length>48 ? t.slice(0,45)+'…' : t; }
-function num(v){ const n=parseFloat(v||'0'); return isFinite(n)?n:0; }
-function fmtEUR(n){ return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0); }
-function fmtCOP(n){ const v=Math.round(n||0); const isMob=window.innerWidth<=600; if(isMob){ if(v>=1_000_000) return (v/1_000_000).toFixed(2).replace(/\.?0+$/,'')+'M COP'; if(v>=1_000) return Math.round(v/1_000)+'K COP'; } return new Intl.NumberFormat('es-CO').format(v)+' COP'; }
-function parseDMY(s){ const [d,m,y]=(s||'').split('/').map(x=>+x); return new Date(y,m-1,d); }
-function formatDMY(dt){ const d=String(dt.getDate()).padStart(2,'0'); const m=String(dt.getMonth()+1).padStart(2,'0'); const y=dt.getFullYear(); return `${d}/${m}/${y}`; }
-function addDays(dt, n){ const d=new Date(dt); d.setDate(d.getDate()+n); return d; }
-function weekdayShortEs(date){ const s=new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(date); return s.replace('.', '').slice(0,3).toUpperCase(); }
+function abbrText(s){ let t = s||''; CITY_ABBR.forEach(([re,rep])=>{ t = t.replace(re,rep); }); return t.length>65 ? t.slice(0,62)+'…' : t; }
 
-// ======= Catálogo =======
+// ---------- Categorías ----------
 const CATEGORY_DEFS = {
   VUE:{label:'Vuelos', icon:'✈️', abbr:'VUE'},
   TRN_BTA:{label:'Transporte Bogotá', icon:'🚕', abbr:'TRN-BTA'},
@@ -236,28 +310,29 @@ const CATEGORY_DEFS = {
   ROAD_ES:{label:'Roadtrip España', icon:'🚙', abbr:'ROAD-ES'}
 };
 
-// ======= Datos demo =======
+// ---------- Estado inicial ----------
 const SAMPLE = {
   fx: 4678.18,
   detalle: [
-    {cat:'ROAD_ES', det:'Gasolina LGR → MAD (RAV4)', eur:35},
-    {cat:'ROAD_ES', det:'Parking MAD (26 Sep – 17 Oct)', eur:126},
-    {cat:'EXTRA', det:'BOG → Villa de Leyva (bus 9 €/pax x3)', eur:27},
     {cat:'VUE', det:'Jetsmart BOG → MDE (3 pax con equipaje)', eur:120},
-    {cat:'TRN_MDE', det:'Uber JMC → MDE (ida, estim.)', eur:7},
-    {cat:'STY_MDE', det:'Apto MDE (jue–lun, total 1’060.000 COP)', eur:226.6},
-    {cat:'TOUR_MDE', det:'Free tour Comuna 13 (propina 10 €/pax x3)', eur:30},
-    {cat:'TOUR_MDE', det:'Tour Guatapé (30 €/pax x3)', eur:90},
     {cat:'VUE', det:'Avianca MDE → AXM (3 pax con equipaje)', eur:140},
-    {cat:'RENT', det:'Alquiler Kia Picanto (5 días)', eur:180},
+    {cat:'VUE', det:'Wingo AXM → BOG (3 pax con equipaje)', eur:130},
+    {cat:'TRN_BTA', det:'Uber Suba ↔ Apto El Dorado (ida/vuelta, estim.)', eur:22},
+    {cat:'TRN_MDE', det:'Uber JMC → MDE (ida, estim.)', eur:7},
+    {cat:'TRN_MDE', det:'Uber MDE → JMC (vuelta, estim.)', eur:7},
+        {cat:'RENT', det:'Alquiler Kia Picanto (5 días)', eur:180},
     {cat:'RENT', det:'Seguro adicional (estim.)', eur:50},
     {cat:'RENT', det:'Gasolina + peajes (5 días)', eur:40},
+    {cat:'STY_MDE', det:'Apto MDE (jue–lun, total 1’060.000 COP)', eur:226.6},
     {cat:'STY_AXM', det:'Casa Circasia (5 noches)', eur:160},
+    {cat:'TOUR_MDE', det:'Free tour Comuna 13 (propina 10 €/pax x3)', eur:30},
+    {cat:'TOUR_MDE', det:'Tour Guatapé (30 €/pax x3)', eur:90},
     {cat:'TOUR_EJE', det:'Entrada Parque del Café (26 €/pax x3)', eur:78},
     {cat:'TOUR_EJE', det:'Entrada Valle del Cocora (4 €/pax x3)', eur:12},
     {cat:'TOUR_EJE', det:'Entrada Termales Santa Rosa (10 €/pax x3)', eur:30},
-    {cat:'VUE', det:'Wingo AXM → BOG (3 pax con equipaje)', eur:130},
-    {cat:'TRN_BTA', det:'Uber Suba ↔ Apto El Dorado (ida/vuelta, estim.)', eur:22}
+    {cat:'EXTRA', det:'BOG → Villa de Leyva (bus 9 €/pax x3)', eur:27},
+    {cat:'ROAD_ES', det:'Parking MAD (26 Sep – 17 Oct)', eur:126},
+    {cat:'ROAD_ES', det:'Gasolina LGR → MAD (RAV4, est.)', eur:35},
   ],
   itinerario: [
     ['26/09/2025','05:00','LGR → MAD','Conducir RAV4 al parking T1/T2/T3',0],
@@ -275,7 +350,7 @@ const SAMPLE = {
     ['10/10/2025','10:00','AXM/Circasia','Día libre + coche + Noche',76],
     ['11/10/2025','18:50','AXM → BOG','Coche + Gasolina + Vuelo Wingo + Uber',184],
     ['16/10/2025','—','BOG → MAD','Traslado a El Dorado (Uber XL, 3 pax + 1 gato)',25],
-    ['17/10/2025','10:00','MAD (Barajas)','Recoger RAV4 y retorno a LGR',0]
+    ['17/10/2025','10:00','MAD (Barajas)','Recoger RAV4 y retorno a LGR',0],
   ],
   stays: [
     {desde:'02/10/2025', hasta:'06/10/2025', lugar:'MDE · Apto', nota:'4 noches'},
@@ -283,248 +358,271 @@ const SAMPLE = {
   ]
 };
 
-// ======= Estado y persistencia =======
-const KEY='colombia-plan';
-function clone(o){return JSON.parse(JSON.stringify(o))}
-function safeParse(s){try{return JSON.parse(s)}catch(e){return null}}
-function normalize(s){const base=clone(SAMPLE); if(!s||typeof s!=='object')return base;
-  s.fx=+s.fx>0?+s.fx:base.fx;
-  if(!Array.isArray(s.detalle)||!s.detalle.length)s.detalle=base.detalle;
-  if(!Array.isArray(s.itinerario)||!s.itinerario.length)s.itinerario=base.itinerario;
-  if(!Array.isArray(s.stays)||!s.stays.length)s.stays=base.stays; return s}
-function loadState(){const obj=safeParse(localStorage.getItem(KEY)); return normalize(obj||clone(SAMPLE))}
-function saveState(){try{localStorage.setItem(KEY, JSON.stringify(state))}catch(e){}}
 let state = loadState();
+function loadState(){
+  // Para volver a un estado 100% funcional: siempre arrancamos con SAMPLE
+  // (ignoramos localStorage por ahora). Luego podemos reactivar persistencia.
+  return JSON.parse(JSON.stringify(SAMPLE));
+}catch(e){
+    return normalize(JSON.parse(JSON.stringify(SAMPLE)));
+  }
+}
+function normalize(s){
+  const base = JSON.parse(JSON.stringify(SAMPLE));
+  if(!s || typeof s!== 'object') return base;
+  s.fx = +s.fx>0 ? +s.fx : base.fx;
+  if(!Array.isArray(s.detalle) || s.detalle.length===0) s.detalle = base.detalle;
+  if(!Array.isArray(s.itinerario) || s.itinerario.length===0) s.itinerario = base.itinerario;
+  if(!Array.isArray(s.stays) || s.stays.length===0) s.stays = base.stays;
+  return s;
+}
+function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
 
-// ======= FX =======
-function saveFX(){ const v=parseFloat(document.getElementById('fx').value||'0');
-  state.fx=isFinite(v)&&v>0?v:state.fx; document.getElementById('fx').value=state.fx.toFixed(2);
-  saveState(); renderTotals(); renderItTotals(); renderCharts(); renderTables();
+// ---------- Utils ----------
+function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
+function fmtEUR(n){return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n||0)}
+function fmtCOP(n){
+  const v = Math.round(n||0);
+  const isMob = (typeof window!=='undefined' && window.innerWidth<=600);
+  if(isMob){
+    if(v>=1000000) return (v/1000000).toFixed(2).replace(/\.?0+$/,'')+'M COP';
+    if(v>=1000) return Math.round(v/1000)+'K COP';
+  }
+  return new Intl.NumberFormat('es-CO').format(v)+' COP';
 }
-window.addEventListener('resize', ()=>{renderTables();});
+if(typeof window!=='undefined'){
+  window.addEventListener('resize', ()=>{ renderTables(); renderTotals(); renderItTotals(); });
+}
+function parseDMY(s){ const [d,m,y]=(s||'').split('/').map(x=>+x); return new Date(y,m-1,d); }
+function formatDMY(dt){ const d=String(dt.getDate()).padStart(2,'0'); const m=String(dt.getMonth()+1).padStart(2,'0'); const y=dt.getFullYear(); return `${d}/${m}/${y}`; }
+function addDays(dt, n){ const d=new Date(dt); d.setDate(d.getDate()+n); return d; }
+function weekdayShortEs(date){ const s=new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(date); return s.replace('.', '').slice(0,3).toUpperCase(); }
 
-// ======= Modales =======
-function openAddModal(){ const m=document.getElementById('modalAdd'); const sel=document.getElementById('mCat');
-  sel.innerHTML=Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join('');
-  m.style.display='grid';
-}
-function closeAddModal(){ document.getElementById('modalAdd').style.display='none' }
-function confirmAdd(){ const k=document.getElementById('mCat').value; const d=document.getElementById('mDet').value||'Nuevo ítem';
-  const e=num(document.getElementById('mEur').value); state.detalle.push({cat:k,det:d,eur:e}); saveState(); closeAddModal(); render();
-}
-function openAddItModal(){ document.getElementById('modalAddIt').style.display='grid' }
-function closeAddItModal(){ document.getElementById('modalAddIt').style.display='none' }
-function confirmAddIt(){ const f=document.getElementById('miFecha').value||''; const h=document.getElementById('miHora').value||'';
-  const l=document.getElementById('miLugar').value||''; const a=document.getElementById('miAct').value||'';
-  const e=num(document.getElementById('miEur').value); state.itinerario.push([f,h,l,a,e]); saveState(); closeAddItModal(); render();
-}
-function openStayModal(){ document.getElementById('modalStay').style.display='grid' }
-function closeStayModal(){ document.getElementById('modalStay').style.display='none' }
-function confirmStay(){ const d=document.getElementById('stDesde').value||''; const h=document.getElementById('stHasta').value||'';
-  const l=document.getElementById('stLugar').value||''; const n=document.getElementById('stNota').value||'';
-  if(d&&h&&l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendars(); } closeStayModal();
+// ---------- FX ----------
+function saveFX(){ const v = parseFloat(document.getElementById('fx').value||'0'); state.fx = isFinite(v) && v>0 ? v : state.fx; document.getElementById('fx').value = state.fx.toFixed(2); saveState(); renderTotals(); renderItTotals(); }
+
+// ---------- Modales ----------
+function openAddModal(){ const m=document.getElementById('modalAdd'); const sel=document.getElementById('mCat'); sel.innerHTML = Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join(''); m.style.display='flex'; }
+function closeAddModal(){ document.getElementById('modalAdd').style.display='none'; }
+function confirmAdd(){ const k=document.getElementById('mCat').value; const d=document.getElementById('mDet').value||'Nuevo ítem'; const e=num(document.getElementById('mEur').value); state.detalle.push({cat:k, det:d, eur:e}); saveState(); closeAddModal(); render(); }
+
+function openAddItModal(){ document.getElementById('modalAddIt').style.display='flex'; }
+function closeAddItModal(){ document.getElementById('modalAddIt').style.display='none'; }
+function confirmAddIt(){ const f=document.getElementById('miFecha').value||''; const h=document.getElementById('miHora').value||''; const l=document.getElementById('miLugar').value||''; const a=document.getElementById('miAct').value||''; const e=num(document.getElementById('miEur').value); state.itinerario.push([f,h,l,a,e]); saveState(); closeAddItModal(); render(); }
+
+function openStayModal(){ document.getElementById('modalStay').style.display='flex'; }
+function closeStayModal(){ document.getElementById('modalStay').style.display='none'; }
+function confirmStay(){ const d=document.getElementById('stDesde').value||''; const h=document.getElementById('stHasta').value||''; const l=document.getElementById('stLugar').value||''; const n=document.getElementById('stNota').value||''; if(d && h && l){ state.stays.push({desde:d,hasta:h,lugar:l,nota:n}); saveState(); buildCalendars(); } closeStayModal(); }
+
+// ---------- Presupuesto Detallado ----------
+function delRow(idx){ state.detalle.splice(idx,1); saveState(); render(); }
+function onEditRow(idx, field, value){
+  if(field==='eur') state.detalle[idx].eur = num(value);
+  else if(field==='cat') state.detalle[idx].cat = value;
+  else state.detalle[idx][field] = value;
+  saveState();
+  render();
 }
 
-// ======= CRUD tablas =======
-function delRow(i){ state.detalle.splice(i,1); saveState(); render(); }
-function onEditRow(i,field,val){ if(field==='eur') state.detalle[i].eur=num(val); else if(field==='cat') state.detalle[i].cat=val; else state.detalle[i][field]=val; saveState(); render(); }
+// ---------- Itinerario ----------
 function delItRow(i){ state.itinerario.splice(i,1); saveState(); render(); }
-function onEditIt(i,j,val){ if(j===4) state.itinerario[i][j]=num(val); else state.itinerario[i][j]=val; saveState(); render(); }
+function onEditIt(i, j, value){
+  if(j===4) state.itinerario[i][j] = num(value);
+  else state.itinerario[i][j] = value;
+  saveState();
+  render();
+}
+
+// ---------- Filtros ----------
 function applyFilter(){ renderTables(); renderCharts(); buildCalendars(); }
 
-// ======= Orden lógico (reglas explícitas) =======
-const DATE_RULES=[
-  {re:/LGR\\s*→\\s*MAD|Gasolina|Parking MAD/i, date:'26/09/2025'},
-  {re:/Villa\\s*de\\s*Leyva/i, date:'28/09/2025'},
-  {re:/BOG\\s*→\\s*MDE|Jetsmart/i, date:'02/10/2025'},
-  {re:/Comuna\\s*13/i, date:'03/10/2025'},
-  {re:/Guatapé/i, date:'04/10/2025'},
-  {re:/Pueblito\\s*Paisa|Metro|Metrocable/i, date:'05/10/2025'},
-  {re:/MDE\\s*→\\s*AXM|Avianca/i, date:'06/10/2025'},
-  {re:/Cocora|Salento/i, date:'07/10/2025'},
-  {re:/Parque\\s*del\\s*Caf[eé]/i, date:'08/10/2025'},
-  {re:/Filandia|Termales/i, date:'09/10/2025'},
-  {re:/D[ií]a\\s*libre/i, date:'10/10/2025'},
-  {re:/AXM\\s*→\\s*BOG|Wingo/i, date:'11/10/2025'},
-  {re:/El\\s*Dorado|Uber\\s*XL/i, date:'16/10/2025'}
-];
-function dateFromDetail(item){
-  for(const r of DATE_RULES){ if(r.re.test(item.det)) return r.date; }
-  if(item.cat==='STY_MDE') return '02/10/2025';
-  if(item.cat==='STY_AXM') return '06/10/2025';
-  if(item.cat==='TRN_MDE') return '02/10/2025';
-  if(item.cat==='RENT')    return '06/10/2025';
-  if(item.cat==='TRN_BTA') return '26/09/2025';
-  if(item.cat==='ROAD_ES') return '26/09/2025';
-  return '31/12/2099';
-}
-function reorderPresupuesto(){
-  state.detalle.sort((a,b)=>{
-    const A=dateFromDetail(a).split('/').reverse().join('-');
-    const B=dateFromDetail(b).split('/').reverse().join('-');
-    if(A!==B) return A<B?-1:1;
-    return (a.det||'').localeCompare(b.det||'');
-  });
+// ---------- Render maestro ----------
+function render(){
+  document.getElementById('fx').value = state.fx.toFixed(2);
+  fillCatFilter();
+  if(typeof reorderPresupuesto==='function') reorderPresupuesto();
+  renderTables();
+  renderTotals();
+  renderItTotals();
+  renderCharts();
+  buildCalendars();
 }
 
-// ======= Render =======
-function fillCatFilter(){ const sel=document.getElementById('filterCat'); const keep=sel.value;
-  const cats=[...new Set(state.detalle.map(r=>r.cat||'OTROS'))].sort();
-  sel.innerHTML='<option value=\"\">Todas</option>'+cats.map(c=>{ const d=CATEGORY_DEFS[c]||{icon:'🧾',label:c}; return `<option value=\"${c}\">${d.icon} ${d.label}</option>`; }).join('');
-  sel.value=keep||'';
-}
+function fillCatFilter(){ const sel = document.getElementById('filterCat'); const keep = sel.value; const cats = [...new Set(state.detalle.map(r=>r.cat||'OTROS'))].sort(); sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>{ const def = CATEGORY_DEFS[c]||{icon:'🧾',label:c}; return `<option value="${c}">${def.icon} ${def.label}</option>`; }).join(''); sel.value = keep || ''; }
+
 function renderTables(){
-  const txt=(document.getElementById('filterText').value||'').toLowerCase();
-  const cat=document.getElementById('filterCat').value||'';
-  reorderPresupuesto();
-
-  // Presupuesto
-  const tb=document.getElementById('tbody-detalle'); tb.innerHTML='';
-  state.detalle.filter(r=>(!cat||r.cat===cat)&&(!txt||(r.det||'').toLowerCase().includes(txt))).forEach((r,i)=>{
-    const def=CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
+  const txt = (document.getElementById('filterText').value||'').toLowerCase();
+  const cat = document.getElementById('filterCat').value||'';
+  // Detalle
+  const tb = document.getElementById('tbody-detalle'); tb.innerHTML = '';
+  state.detalle.filter(r => (!cat || r.cat===cat) && (!txt || (r.det).toLowerCase().includes(txt))).forEach((r,idx)=>{
+    const tr = document.createElement('tr'); const def = CATEGORY_DEFS[r.cat]||{icon:'🧾',abbr:r.cat,label:r.cat};
+    tr.innerHTML = `
       <td title="${def.label}">
-        <select onchange="onEditRow(${i},'cat',this.value)">
+        <select onchange="onEditRow(${idx},'cat',this.value)">
           ${Object.entries(CATEGORY_DEFS).map(([k,v])=>`<option value="${k}" ${k===r.cat?'selected':''}>${v.icon} ${v.abbr}</option>`).join('')}
         </select>
       </td>
-      <td title="${r.det}"><input type="text" value="${abbrText(r.det)}" oninput="onEditRow(${i},'det',this.value)"/></td>
-      <td class="right"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${i},'eur',this.value)"/></td>
+      <td title="${r.det}"><input type="text" value="${abbrText(r.det)}" oninput="onEditRow(${idx},'det',this.value)"/></td>
+      <td class="right"><input class="eur-input" type="number" step="0.01" value="${r.eur}" oninput="onEditRow(${idx},'eur',this.value)"/></td>
       <td class="right cop">${fmtCOP(r.eur*state.fx)}</td>
-      <td class="right"><button onclick="delRow(${i})">🗑️</button></td>`;
+      <td class="right"><button class="icon-btn" title="Eliminar" onclick="delRow(${idx})">🗑️</button></td>`;
     tb.appendChild(tr);
   });
-
   // Itinerario
-  const ft=(document.getElementById('filterIt').value||'').toLowerCase();
-  const tbi=document.getElementById('tbody-it'); tbi.innerHTML='';
-  const its=state.itinerario.slice().sort((a,b)=>{const ka=(a[0]||'').split('/').reverse().join('-')+(a[1]||''); const kb=(b[0]||'').split('/').reverse().join('-')+(b[1]||''); return ka.localeCompare(kb)});
-  its.filter(it=>(!ft||(it[1]+" "+it[2]+" "+it[3]).toLowerCase().includes(ft))).forEach((it)=>{
-    const idx=state.itinerario.indexOf(it);
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><input type="text" value="${it[0]}" oninput="onEditIt(${idx},0,this.value)"/></td>
-      <td><input type="text" value="${it[1]}" oninput="onEditIt(${idx},1,this.value)"/></td>
-      <td><input type="text" value="${abbrText(it[2])}" oninput="onEditIt(${idx},2,this.value)"/></td>
-      <td><input type="text" value="${abbrText(it[3])}" oninput="onEditIt(${idx},3,this.value)"/></td>
-      <td class="right"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${idx},4,this.value)"/></td>
+  const ft = (document.getElementById('filterIt').value||'').toLowerCase();
+  const tbi = document.getElementById('tbody-it'); tbi.innerHTML='';
+  state.itinerario.filter(it => (!ft || (it[1]+" "+it[2]+" "+it[3]).toLowerCase().includes(ft))).forEach((it, i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td title="${it[0]}"><input type="text" value="${it[0]}" oninput="onEditIt(${i},0,this.value)"/></td>
+      <td title="${it[1]}"><input type="text" value="${it[1]}" oninput="onEditIt(${i},1,this.value)"/></td>
+      <td title="${it[2]}"><input type="text" value="${abbrText(it[2])}" oninput="onEditIt(${i},2,this.value)"/></td>
+      <td title="${it[3]}"><input type="text" value="${abbrText(it[3])}" oninput="onEditIt(${i},3,this.value)"/></td>
+      <td class="right"><input class="eur-input" type="number" step="0.01" value="${it[4]}" oninput="onEditIt(${i},4,this.value)"/></td>
       <td class="right cop">${fmtCOP(it[4]*state.fx)}</td>
-      <td class="right"><button onclick="delItRow(${idx})">🗑️</button></td>`;
+      <td class="right"><button class="icon-btn" title="Eliminar" onclick="delItRow(${i})">🗑️</button></td>`;
     tbi.appendChild(tr);
   });
 }
-function renderTotals(){ const e=state.detalle.reduce((a,b)=>a+(+b.eur||0),0); const c=e*state.fx; document.getElementById('total-eur').textContent=fmtEUR(e); document.getElementById('total-cop').textContent=fmtCOP(c); }
-function renderItTotals(){ const e=state.itinerario.reduce((a,b)=>a+(+b[4]||0),0); const c=e*state.fx; document.getElementById('tot-it-eur').textContent=fmtEUR(e); document.getElementById('tot-it-cop').textContent=fmtCOP(c); }
 
-// ======= Gráficas (orden narrativo) =======
+function renderTotals(){ const totalE = state.detalle.reduce((a,b)=>a+(+b.eur||0),0); const totalC = totalE * state.fx; document.getElementById('total-eur').textContent = fmtEUR(totalE); document.getElementById('total-cop').textContent = fmtCOP(totalC); }
+function renderItTotals(){ const tE = state.itinerario.reduce((a,b)=>a+(+b[4]||0),0); const tC = tE * state.fx; document.getElementById('tot-it-eur').textContent = fmtEUR(tE); document.getElementById('tot-it-cop').textContent = fmtCOP(tC); }
+
+// ---------- Gráficos ----------
 let barChart, pieChart;
-function groupByCategoryNarrative(){
-  const txt=(document.getElementById('filterText').value||'').toLowerCase();
-  const catf=document.getElementById('filterCat').value||'';
-  const rows=state.detalle.filter(r=>(!catf||r.cat===catf)&&(!txt||(r.det||'').toLowerCase().includes(txt)));
-  const byCat=new Map();
-  rows.forEach(r=>{
-    const n=dateFromDetail(r).split('/').reverse().join('-');
-    const ag=byCat.get(r.cat)||{sum:0,min:n};
-    ag.sum+=(+r.eur||0);
-    if(n<ag.min) ag.min=n;
-    byCat.set(r.cat,ag);
+function groupByCategory(){
+  // Agrupa por categoría pero respeta el ORDEN NARRATIVO actual
+  const txt = (document.getElementById('filterText').value||'').toLowerCase();
+  const catFilter = document.getElementById('filterCat').value||'';
+  const rows = state.detalle.filter(r => (!catFilter || r.cat===catFilter) && (!txt || (r.det||'').toLowerCase().includes(txt)));
+  const sum = new Map();
+  const orderMap = new Map();
+  rows.forEach((r,idx)=>{
+    sum.set(r.cat, (sum.get(r.cat)||0) + (+r.eur||0));
+    if(!orderMap.has(r.cat)) orderMap.set(r.cat, idx); // primer índice donde aparece esa cat en el orden narrativo
   });
-  const cats=[...byCat.entries()].sort((a,b)=>a[1].min.localeCompare(b[1].min)).map(([c])=>c);
-  const labels=cats.map(k=>{const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k}; return `${d.icon} ${d.abbr}`});
-  const values=cats.map(k=>byCat.get(k).sum);
-  return {labels,values};
+  const cats = [...sum.keys()].sort((a,b)=> (orderMap.get(a)||0) - (orderMap.get(b)||0));
+  const labels = cats.map(k=>{ const d=CATEGORY_DEFS[k]||{icon:'🧾',abbr:k}; return `${d.icon} ${d.abbr}`; });
+  const values = cats.map(k=> sum.get(k));
+  return {labels, values};
 }
-function renderCharts(){
-  const {labels,values}=groupByCategoryNarrative();
-  const ctx1=document.getElementById('barChart'); const ctx2=document.getElementById('pieChart');
-  const colors=['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981'];
-  if(barChart) barChart.destroy();
-  barChart=new Chart(ctx1,{type:'bar',data:{labels,datasets:[{label:'Gasto (€)',data:values,backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]},options:{responsive:true,plugins:{legend:{display:false}}}});
-  if(pieChart) pieChart.destroy();
-  pieChart=new Chart(ctx2,{type:'pie',data:{labels,datasets:[{data:values,backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
-}
+function renderCharts(){ const {labels, values} = groupByCategory(); const ctx1 = document.getElementById('barChart'); const ctx2 = document.getElementById('pieChart'); const colors = ['#22c55e','#60a5fa','#f59e0b','#f472b6','#a78bfa','#06b6d4','#94a3b8','#84cc16','#ef4444','#10b981']; if(barChart) barChart.destroy(); barChart = new Chart(ctx1, { type:'bar', data:{labels, datasets:[{label:'Gasto (€)', data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{display:false}}} }); if(pieChart) pieChart.destroy(); pieChart = new Chart(ctx2, { type:'pie', data:{labels, datasets:[{data:values, backgroundColor:labels.map((_,i)=>colors[i%colors.length])}]}, options:{responsive:true, plugins:{legend:{position:'bottom'}}} }); }
 
-// ======= Clima promedio y Calendario =======
-const CLIMATE_LOCAL={ BOG:{'09':{tmin:9,tmax:20,pp:3},'10':{tmin:9,tmax:19,pp:5}},
+// ---------- Clima (sin dependencia de red por defecto) ----------
+const CLIMATE_LOCAL = {
+  BOG:{'09':{tmin:9,tmax:20,pp:3},'10':{tmin:9,tmax:19,pp:5}},
   MDE:{'09':{tmin:17,tmax:28,pp:6},'10':{tmin:17,tmax:27,pp:7}},
   AXM:{'09':{tmin:16,tmax:26,pp:7},'10':{tmin:16,tmax:25,pp:8}},
-  MAD:{'09':{tmin:15,tmax:28,pp:1},'10':{tmin:11,tmax:21,pp:2}},};
-function pickCityCode(text){ const t=(text||'').toUpperCase();
-  if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE';
-  if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM';
-  if(t.includes('BOG')||t.includes('SUBA')) return 'BOG';
-  if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('LGR')||t.includes('LOGRO')) return 'MAD';
-  return 'MDE';
-}
-function getWxLocal(dateStr, placeText){ const code=pickCityCode(placeText||''); const month=(dateStr||'01/01/2000').split('/')[1]; const m=(CLIMATE_LOCAL[code]||{})[month]||{}; const rainy=(m.pp||0)>2; return { code, tmin: m.tmin, tmax: m.tmax, rainy }; }
+  MAD:{'09':{tmin:15,tmax:28,pp:1},'10':{tmin:11,tmax:21,pp:2}},
+};
+function pickCityCode(text){ const t=(text||'').toUpperCase(); if(t.includes('MDE')||t.includes('MEDELL')) return 'MDE'; if(t.includes('AXM')||t.includes('CIRCASIA')||t.includes('ARMENIA')) return 'AXM'; if(t.includes('BOG')||t.includes('SUBA')) return 'BOG'; if(t.includes('MAD')||t.includes('BARAJAS')||t.includes('LGR')||t.includes('LOGRO')) return 'MAD'; return 'MDE'; }
+function getWxLocal(dateStr, placeText){ const code = pickCityCode(abbrText(placeText||'')); const month = (dateStr||'01/01/2000').split('/')[1]; const m = (CLIMATE_LOCAL[code]||{})[month]||{}; const rainy = (m.pp||0) > 2; return { code, tmin: m.tmin, tmax: m.tmax, rainy }; }
+
+// ---------- Calendarios ----------
 function switchCal(which){ document.getElementById('tabList').classList.toggle('active', which==='list'); document.getElementById('tabAgenda').classList.toggle('active', which==='agenda'); document.getElementById('calendarList').style.display = which==='list'? 'grid':'none'; document.getElementById('calendarAgenda').style.display = which==='agenda'? 'grid':'none'; }
 function buildCalendars(){ buildListCalendar(); buildAgendaCalendar(); }
 function buildListCalendar(){
-  const host=document.getElementById('calendarList'); host.innerHTML=''; const by={};
-  state.itinerario.forEach(it=>{ const [fecha,hora,lugar,act]=it; const k=fecha||'Sin fecha'; (by[k]=by[k]||[]).push({hora:hora||'', lugar, act}); });
+  const host = document.getElementById('calendarList'); host.innerHTML='';
+  const byDate = {};
+  for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'', lugar, act}); }
   (state.stays||[]).forEach(st=>{
-    const from=parseDMY(st.desde), to=parseDMY(st.hasta);
-    if(!isNaN(from)&&!isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){
-      const k=formatDMY(d); (by[k]=by[k]||[]);
-      if(d.getTime()===from.getTime()) by[k].push({hora:'15:00',lugar:st.lugar,act:'Check-in'});
-      else if(d.getTime()===to.getTime()) by[k].push({hora:'11:00',lugar:st.lugar,act:'Check-out'});
-      else by[k].push({hora:'',lugar:st.lugar,act:st.nota?`Estadía · ${st.nota}`:'Estadía'});
-    }}
+    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
+    if(!isNaN(from) && !isNaN(to)){
+      for(let d=from; d<=to; d=addDays(d,1)){
+        const key = formatDMY(d); if(!byDate[key]) byDate[key]=[];
+        const isStart = d.getTime()===from.getTime();
+        const isEnd = d.getTime()===to.getTime();
+        if(isStart) byDate[key].push({hora:'15:00', lugar: st.lugar, act: 'Check-in'});
+        if(isEnd) byDate[key].push({hora:'11:00', lugar: st.lugar, act: 'Check-out'});
+        if(!isStart && !isEnd){ byDate[key].push({hora:'', lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía'}); }
+      }
+    }
   });
-  const keys=Object.keys(by).sort((a,b)=>a.split('/').reverse().join('-').localeCompare(b.split('/').reverse().join('-')));
-  keys.forEach(k=>{
-    const dt=parseDMY(k); const wd=isNaN(dt)?'':weekdayShortEs(dt);
-    const col=document.createElement('div'); col.className='day-col';
-    col.innerHTML=`<div class="day-header"><span>${k}</span><span>${wd}</span></div>`;
-    const wx=getWxLocal(k, by[k][0]?.lugar||''); const rain=wx.rainy?'🌧️':'☀️';
-    const tmin=wx.tmin!=null?Math.round(wx.tmin):'—'; const tmax=wx.tmax!=null?Math.round(wx.tmax):'—';
-    const wxp=document.createElement('div'); wxp.className='wx'; wxp.textContent=`${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp);
-    (by[k].sort((x,y)=>(x.hora||'').localeCompare(y.hora||''))).forEach(it=>{
-      const el=document.createElement('div'); el.className='slot';
-      el.innerHTML=`<div class="time">${it.hora||'—:—'}</div><div class="title">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el);
-    });
+  const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); });
+  for(const k of keys){
+    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
+    const col = document.createElement('div'); col.className='day-col';
+    col.innerHTML = `<div class=\"day-header\"><span>${k}</span><span>${wd}</span></div>`;
+    const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️';
+    const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
+    const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp);
+    const items = byDate[k].sort((x,y)=> (x.hora||'').localeCompare(y.hora||''));
+    for(const it of items){ const el = document.createElement('div'); el.className='slot'; el.innerHTML = `<div class=\"time\">${it.hora||'—:—'}</div><div class=\"title\">${abbrText(it.lugar)} · ${abbrText(it.act)}</div>`; col.appendChild(el); }
     host.appendChild(col);
-  });
-}
+  }
+} }
 function buildAgendaCalendar(){
-  const host=document.getElementById('calendarAgenda'); host.innerHTML='';
-  const HSTART=6, HEND=22, PIX_PER_H=54;
-  function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0,Math.min((HEND-HSTART)*60,t))/60*PIX_PER_H; }
-  const by={}; state.itinerario.forEach(it=>{ const [fecha,hora,lugar,act]=it; const k=fecha||'Sin fecha'; (by[k]=by[k]||[]).push({hora:hora||'08:00',dur:60,lugar,act}); });
+  const host = document.getElementById('calendarAgenda'); host.innerHTML='';
+  const HSTART=6, HEND=22, PIX_PER_H=54; function yFrom(hm){ if(!hm||hm==='—') return 0; const [h,m]=hm.split(':').map(x=>+x||0); const t=(h*60+m)-HSTART*60; return Math.max(0, Math.min((HEND-HSTART)*60, t)) / 60*PIX_PER_H; }
+  const byDate = {};
+  for(const it of state.itinerario){ const [fecha,hora,lugar,act] = it; const key = fecha||'Sin fecha'; if(!byDate[key]) byDate[key]=[]; byDate[key].push({hora:hora||'08:00', dur:60, lugar, act}); }
   (state.stays||[]).forEach(st=>{
-    const from=parseDMY(st.desde), to=parseDMY(st.hasta);
-    if(!isNaN(from)&&!isNaN(to)){ for(let d=from; d<=to; d=addDays(d,1)){
-      const k=formatDMY(d); (by[k]=by[k]||[]); const isStart=d.getTime()===from.getTime(); const isEnd=d.getTime()===to.getTime();
-      if(isStart) by[k].push({hora:'15:00',dur:60,lugar:st.lugar,act:'Check-in',stay:true});
-      if(isEnd) by[k].push({hora:'11:00',dur:60,lugar:st.lugar,act:'Check-out',stay:true});
-      if(!isStart&&!isEnd) by[k].push({hora:'09:00',dur:120,lugar:st.lugar,act:st.nota?`Estadía · ${st.nota}`:'Estadía',stay:true});
-    }}
+    const from = parseDMY(st.desde), to = parseDMY(st.hasta);
+    if(!isNaN(from) && !isNaN(to)){
+      for(let d=from; d<=to; d=addDays(d,1)){
+        const key = formatDMY(d); if(!byDate[key]) byDate[key]=[];
+        const isStart = d.getTime()===from.getTime(); const isEnd = d.getTime()===to.getTime();
+        if(isStart) byDate[key].push({hora:'15:00', dur:60, lugar: st.lugar, act: 'Check-in', stay:true});
+        if(isEnd) byDate[key].push({hora:'11:00', dur:60, lugar: st.lugar, act: 'Check-out', stay:true});
+        if(!isStart && !isEnd) byDate[key].push({hora:'09:00', dur:120, lugar: st.lugar, act: st.nota?`Estadía · ${st.nota}`:'Estadía', stay:true});
+      }
+    }
   });
-  const keys=Object.keys(by).sort((a,b)=>a.split('/').reverse().join('-').localeCompare(b.split('/').reverse().join('-')));
-  keys.forEach(k=>{
-    const dt=parseDMY(k); const wd=isNaN(dt)?'':weekdayShortEs(dt);
-    const col=document.createElement('div'); col.className='agenda-day';
-    col.innerHTML=`<div class="agenda-header"><span>${k}</span><span>${wd}</span></div>`;
-    const wx=getWxLocal(k, by[k][0]?.lugar||''); const rain=wx.rainy?'🌧️':'☀️';
-    const tmin=wx.tmin!=null?Math.round(wx.tmin):'—'; const tmax=wx.tmax!=null?Math.round(wx.tmax):'—';
-    const wxp=document.createElement('div'); wxp.className='wx'; wxp.textContent=`${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp);
-    const hours=document.createElement('div'); hours.className='hours';
-    for(let h=HSTART;h<=HEND;h++){ const line=document.createElement('div'); line.className='hour-line'; line.style.top=((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line);
-      const label=document.createElement('div'); label.className='hour-label'; label.style.top=((h-HSTART)*PIX_PER_H)+'px'; label.textContent=String(h).padStart(2,'0')+':00'; hours.appendChild(label); }
-    (by[k]||[]).sort((a,b)=>(a.hora||'').localeCompare(b.hora||'')).forEach(it=>{
-      const block=document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top=yFrom(it.hora)+'px'; block.style.height=((it.dur||60)/60*PIX_PER_H)+'px';
-      block.innerHTML=`<div class="btime">${it.hora} · ${abbrText(it.lugar)}</div><div class="btitle">${abbrText(it.act)}</div>`; hours.appendChild(block);
-    });
+  const keys = Object.keys(byDate).sort((a,b)=>{ const pa=a.split('/').reverse().join('-'); const pb=b.split('/').reverse().join('-'); return pa.localeCompare(pb); });
+  for(const k of keys){
+    const dt = parseDMY(k); const wd = isNaN(dt)?'':weekdayShortEs(dt);
+    const col = document.createElement('div'); col.className='agenda-day';
+    col.innerHTML = `<div class=\"agenda-header\"><span>${k}</span><span>${wd}</span></div>`;
+    const wx = getWxLocal(k, byDate[k][0]?.lugar||''); const rain = wx.rainy? '🌧️':'☀️';
+    const tmin = wx.tmin!=null? Math.round(wx.tmin): '—'; const tmax = wx.tmax!=null? Math.round(wx.tmax): '—';
+    const wxp = document.createElement('div'); wxp.className='wx'; wxp.textContent = `${rain} ${wx.code} · ${tmin}–${tmax}°C (prom.)`; col.appendChild(wxp);
+    const hours = document.createElement('div'); hours.className='hours';
+    for(let h=HSTART; h<=HEND; h++){ const line = document.createElement('div'); line.className='hour-line'; line.style.top = ((h-HSTART)*PIX_PER_H)+'px'; hours.appendChild(line); const label = document.createElement('div'); label.className='hour-label'; label.style.top = ((h-HSTART)*PIX_PER_H)+'px'; label.textContent = String(h).padStart(2,'0')+':00'; hours.appendChild(label); }
+    const items = byDate[k].sort((a,b)=> (a.hora||'').localeCompare(b.hora||''));
+    for(const it of items){ const top = yFrom(it.hora); const hpx = (it.dur||60)/60*PIX_PER_H; const block = document.createElement('div'); block.className='block'+(it.stay?' stay':''); block.style.top = top+'px'; block.style.height = hpx+'px'; block.innerHTML = `<div class=\"btime\">${it.hora} · ${abbrText(it.lugar)}</div><div class=\"btitle\">${abbrText(it.act)}</div>`; hours.appendChild(block); }
     col.appendChild(hours); host.appendChild(col);
-  });
-}
+  }
+} }
 
-// ======= Reset & Master =======
-function resetData(){ state=clone(SAMPLE); saveState(); render(); }
-function render(){ document.getElementById('fx').value=state.fx.toFixed(2); fillCatFilter(); renderTables(); renderTotals(); renderItTotals(); renderCharts(); buildCalendars(); }
+// ---------- Sync GitHub ----------
+function openSyncModal(){ document.getElementById('modalSync').style.display='flex'; const repo = localStorage.getItem('ghRepo')||''; const branch = localStorage.getItem('ghBranch')||'main'; const path = localStorage.getItem('ghPath')||'data/plan.json'; document.getElementById('ghRepo').value=repo; document.getElementById('ghBranch').value=branch; document.getElementById('ghPath').value=path; }
+function closeSyncModal(){ document.getElementById('modalSync').style.display='none'; }
+async function saveToGitHub(){ const repo = document.getElementById('ghRepo').value.trim(); const branch = document.getElementById('ghBranch').value.trim(); const path = document.getElementById('ghPath').value.trim(); const token = document.getElementById('ghToken').value.trim(); const msg = document.getElementById('syncMsg'); if(!repo||!branch||!path||!token){ msg.textContent='Completa todos los campos.'; return; } localStorage.setItem('ghRepo',repo); localStorage.setItem('ghBranch',branch); localStorage.setItem('ghPath',path); try{ const content = btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2)))); const headers = { 'Authorization': `token ${token}`, 'Accept':'application/vnd.github+json' }; const getUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(branch)}`; let sha=null; const getRes = await fetch(getUrl,{headers}); if(getRes.ok){ const j=await getRes.json(); sha=j.sha; } const putUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}`; const body = { message:'update plan.json', content, branch, sha }; const putRes = await fetch(putUrl,{ method:'PUT', headers, body: JSON.stringify(body)}); if(!putRes.ok){ const t=await putRes.text(); throw new Error(t); } msg.textContent='¡Guardado en GitHub!'; } catch(e){ msg.textContent='Error guardando en GitHub: '+e.message; } }
+
+// ---------- Init ----------
+function resetData(){ state = JSON.parse(JSON.stringify(SAMPLE)); saveState(); render(); }
+function recoverData(){ localStorage.removeItem('colombia-plan'); state = JSON.parse(JSON.stringify(SAMPLE)); render(); }
 render();
+// Orden lógico del presupuesto
+function reorderPresupuesto(){
+  function d2n(dmy){ const [d,m,y]=dmy.split('/').map(x=>+x); return y*10000 + m*100 + d; }
+  function tokens(s){ const t=(abbrText(s||'')+ '').toUpperCase(); const set=new Set(); const keys=['BOG','MDE','AXM','MAD','JMC','LGR','VILLA','LEYVA','SUBA','DORADO','CIRCASIA','SALENTO','FILANDIA']; for(const k of keys){ if(t.includes(k)) set.add(k); } return set; }
+  const anchors=[]; // derivados del itinerario y las estadías
+  for(const it of state.itinerario){ anchors.push({date: it[0], tokens: tokens(it[2]+' '+it[3])}); }
+  for(const st of (state.stays||[])){ anchors.push({date: st.desde, tokens: tokens(st.lugar)}); anchors.push({date: st.hasta, tokens: tokens(st.lugar)}); }
+  function catTokens(cat){ if(cat==='TRN_BTA') return new Set(['BOG','SUBA','DORADO']); if(cat==='TRN_MDE') return new Set(['MDE','JMC']); if(cat==='TRN_AXM') return new Set(['AXM']); if(cat==='STY_MDE') return new Set(['MDE']); if(cat==='STY_AXM') return new Set(['AXM','CIRCASIA']); if(cat==='ROAD_ES') return new Set(['MAD','LGR']); return new Set(); }
+  function score(a,b){ let s=0; a.forEach(t=>{ if(b.has(t)) s++; }); return s; }
+  function inferDate(item){
+    const itoks = tokens(item.det); const ct = catTokens(item.cat); ct.forEach(x=>itoks.add(x));
+    // Estadías a la fecha de inicio correspondiente
+    if(item.cat==='STY_MDE'){ const st=state.stays.find(s=>/MDE|MEDELL/i.test(s.lugar)); if(st) return st.desde; }
+    if(item.cat==='STY_AXM'){ const st=state.stays.find(s=>/CIRCASIA|AXM|ARMENIA/i.test(s.lugar)); if(st) return st.desde; }
+    // ROAD_ES inicial
+    if(item.cat==='ROAD_ES'){ if(/Parking/i.test(item.det) || /Gasolina/i.test(item.det)) return '26/09/2025'; }
+    // Fallback por rutas típicas
+    if(/BOG.*MDE|Jetsmart/i.test(item.det)) return '02/10/2025';
+    if(/MDE.*AXM|Avianca/i.test(item.det)) return '06/10/2025';
+    if(/AXM.*BOG|Wingo/i.test(item.det)) return '11/10/2025';
+    if(/Villa.*Leyva/i.test(item.det)) return '28/09/2025';
+    // Coincidencia con anchors
+    let bestDate='31/12/2099', bestScore=-1;
+    for(const a of anchors){ const s=score(itoks, a.tokens); if(s>bestScore && a.date){ bestScore=s; bestDate=a.date; } else if(s===bestScore && a.date && d2n(a.date)<d2n(bestDate)){ bestDate=a.date; } }
+    return bestDate;
+  }
+  state.detalle.sort((a,b)=>{ const da=d2n(inferDate(a)); const db=d2n(inferDate(b)); if(da!==db) return da-db; return (a.det||'').localeCompare(b.det||''); });
+});
+}
 </script>
 </body>
 </html>
