@@ -146,7 +146,7 @@
             <select id="filterCat" onchange="applyFilter()"><option value="">Todas</option></select>
             <input id="filterText" type="text" placeholder="Filtrar por texto…" oninput="applyFilter()" />
             <button class="primary" onclick="openAddModal()">+ Añadir</button>
-            <button class="warn" onclick="resetData()">Restablecer</button> <button onclick="recoverData()">Cargar demo</button>
+            <button class="warn" onclick="resetData()">Restablecer</button>
           </div>
         </div>
         <div class="table-wrap">
@@ -359,26 +359,8 @@ const SAMPLE = {
 };
 
 let state = loadState();
-function loadState(){
-  try{
-    const raw = localStorage.getItem('colombia-plan');
-    if(!raw) return normalize(JSON.parse(JSON.stringify(SAMPLE)));
-    const obj = JSON.parse(raw);
-    return normalize(obj);
-  }catch(e){
-    return normalize(JSON.parse(JSON.stringify(SAMPLE)));
-  }
-}
-function normalize(s){
-  const base = JSON.parse(JSON.stringify(SAMPLE));
-  if(!s || typeof s!== 'object') return base;
-  s.fx = +s.fx>0 ? +s.fx : base.fx;
-  if(!Array.isArray(s.detalle) || s.detalle.length===0) s.detalle = base.detalle;
-  if(!Array.isArray(s.itinerario) || s.itinerario.length===0) s.itinerario = base.itinerario;
-  if(!Array.isArray(s.stays) || s.stays.length===0) s.stays = base.stays;
-  return s;
-}
-function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
+function loadState(){ const raw = localStorage.getItem('colombia-plan'); return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SAMPLE)); }
+function saveState(){ localStorage.setItem('colombia-plan', JSON.stringify(state)); }
 
 // ---------- Utils ----------
 function num(v){ const n = parseFloat(v||'0'); return isFinite(n)? n:0; }
@@ -579,7 +561,6 @@ async function saveToGitHub(){ const repo = document.getElementById('ghRepo').va
 
 // ---------- Init ----------
 function resetData(){ state = JSON.parse(JSON.stringify(SAMPLE)); saveState(); render(); }
-function recoverData(){ localStorage.removeItem('colombia-plan'); state = JSON.parse(JSON.stringify(SAMPLE)); render(); }
 render();
 // Orden lógico del presupuesto
 function reorderPresupuesto(){
